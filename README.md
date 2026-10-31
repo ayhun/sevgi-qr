@@ -66,6 +66,9 @@ grant narrower, container-scoped blob permissions:
 - Production jobs are serialized; Azure Blob leases lock the state.
 - State and plans are neither committed nor uploaded as workflow artifacts.
 - CI uses Terraform 1.9.8 and the committed provider lockfile.
+- Both jobs use Ubuntu 24.04 explicitly, with Node.js 24-based checkout,
+  setup-terraform and Azure login actions. Runner OS upgrades are intentional,
+  rather than following changes to `ubuntu-latest`.
 
 The initial Terraform configuration only reads the existing resource group's ID and location. **No application hosting resources are defined yet.** The first workflow run verifies federation, state storage and access. Future resources should use `data.azurerm_resource_group.app.name` and `.location`.
 
