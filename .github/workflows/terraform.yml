@@ -1,0 +1,76 @@
+name: Terraform
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Plan only, or plan and apply the saved plan
+        type: choice
+        options: [plan, apply]
+        default: plan
+
+permissions:
+  contents: read
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false -lockfile=readonly
+      - run: terraform validate
+
+  production:
+    needs: validate
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    environment: production
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: terraform-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ARM_CLIENT_ID: e1a4ae50-f5fd-41de-80c8-3159e6b0da84
+      ARM_SUBSCRIPTION_ID: f90ff751-313f-4e7a-a475-8d252d80c41a
+      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      ARM_USE_OIDC: "true"
+      ARM_USE_AZUREAD: "true"
+      ARM_USE_CLI: "false"
+      STATE_ACCOUNT: ${{ vars.TF_STATE_STORAGE_ACCOUNT }}
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check environment configuration
+        run: |
+          test -n "$ARM_TENANT_ID" || { echo '::error::Set production variable AZURE_TENANT_ID'; exit 1; }
+          test -n "$STATE_ACCOUNT" || { echo '::error::Set production variable TF_STATE_STORAGE_ACCOUNT'; exit 1; }
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - name: Initialize remote state with OIDC
+        run: terraform init -lockfile=readonly -backend-config="storage_account_name=$STATE_ACCOUNT"
+      - name: Create plan
+        run: terraform plan -lock-timeout=5m -out=production.tfplan
+      - name: Apply saved plan
+        if: github.event_name == 'workflow_dispatch' && inputs.operation == 'apply'
+        run: terraform apply -lock-timeout=5m production.tfplan
