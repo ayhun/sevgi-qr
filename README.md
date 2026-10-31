@@ -14,6 +14,24 @@ The supplied identity ID must be the **Application (client) ID**, not an Object 
 
 ## One-time setup
 
+The production workflow now creates the state account automatically using the
+`TF_STATE_STORAGE_ACCOUNT` production environment variable, and creates the
+private `tfstate` container before Terraform initializes. Existing accounts and
+state are reused. Choose a globally unique account name (3–24 lowercase letters
+or digits). New accounts use Standard LRS, disable shared keys and public blob
+access, and enable versioning and 14-day blob soft deletion; storage incurs Azure
+usage charges. Even plan-only production runs may create this backend storage.
+
+For automatic creation, an administrator must first grant the identity
+**Contributor** and **Storage Blob Data Contributor** on the `sevgi-qr` resource
+group and register `Microsoft.Storage` in the subscription. Allow time for RBAC
+propagation. The workflow does not assign itself roles or register subscription
+providers. Set `AZURE_TENANT_ID` and `TF_STATE_STORAGE_ACCOUNT` under the GitHub
+`production` environment's **Variables**, not Secrets. Then run the workflow.
+
+Alternatively, use the administrator bootstrap below to pre-create storage and
+grant narrower, container-scoped blob permissions:
+
 1. Open Azure Cloud Shell in **Bash**, authenticated as an administrator able to create storage and assign roles in the target subscription:
 
    ```bash
@@ -52,6 +70,7 @@ terraform -chdir=infra fmt -check -recursive
 terraform -chdir=infra init -backend=false -lockfile=readonly
 terraform -chdir=infra validate
 bash -n scripts/bootstrap-state.sh
+bash -n scripts/ensure-state-storage.sh
 ```
 
 A local Azure login cannot exercise the GitHub federated credential. Verify the trust by running the production workflow.
