@@ -87,10 +87,10 @@ jobs:
       - name: Create plan
         run: terraform plan -lock-timeout=5m -out=production.tfplan
       - name: Apply saved plan
-        if: github.event_name == 'workflow_dispatch' && inputs.operation == 'apply'
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'apply')
         run: terraform apply -lock-timeout=5m production.tfplan
       - name: Show hosting endpoint and DNS target
-        if: github.event_name == 'workflow_dispatch' && inputs.operation == 'apply'
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'apply')
         run: |
           {
             echo '## QR hosting provisioned'

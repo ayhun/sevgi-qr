@@ -56,12 +56,15 @@ grant narrower, container-scoped blob permissions:
    - `AZURE_TENANT_ID`
    - `TF_STATE_STORAGE_ACCOUNT`
 
-3. Under **Actions → Terraform → Run workflow**, select `main` and `plan`. After a successful run, choose `apply` to generate and apply a saved plan. Configure environment reviewers if desired.
+3. Push to `main` to plan and automatically apply the saved plan. Manual
+   **Actions → Terraform → Run workflow** still supports `plan` and `apply`.
+   Configure environment reviewers if desired.
 
 ## Workflow behavior
 
 - Pull requests: formatting and validation without Azure access or OIDC tokens.
-- Pushes to `main`: validation and production plan only.
+- Pushes to `main`: validation, production plan, then automatic apply of that
+  exact saved plan. Changes on `main` can therefore change Azure resources.
 - Manual runs on `main`: plan, or plan plus apply of the exact saved plan in the same job.
 - Production jobs are serialized; Azure Blob leases lock the state.
 - State and plans are neither committed nor uploaded as workflow artifacts.
@@ -84,8 +87,8 @@ configuration does not guarantee a zero Azure bill.
 2. Review the production plan from the push. For a fresh hosting deployment it
    adds `azurerm_static_web_app.qr` on the Free SKU and its custom-domain binding.
    With hosting already provisioned, only the custom-domain binding should be added.
-3. Run **Actions → Terraform → Run workflow → operation: apply** on `main`.
-   Pushes still only plan; they do not apply application infrastructure.
+3. Push to `main`. The workflow plans and applies automatically. For a retry
+   without a new commit, run **Actions → Terraform → Run workflow → apply**.
 4. The successful run summary provides the Azure HTTPS URL and the CNAME target
    for `qr.sgkafali.com`. Add only a `qr` CNAME at the current DNS provider;
    leave the portfolio's apex and `www` records unchanged.
@@ -99,8 +102,8 @@ generated Azure hostname. Frontend deployment remains a separate next step.
 The first domain apply created the Azure binding but failed while polling a
 subscription-scoped operation status, before writing the binding to Terraform
 state. `infra/hosting.tf` includes a declarative import for that exact existing
-domain. The next plan should show **import**, not create or replace; apply that
-plan to bring state back in sync. The workflow identity needs subscription
+domain. The next plan should show **import**, not create or replace; the push
+workflow applies that plan to bring state back in sync. The workflow identity needs subscription
 Reader (or an equivalent custom role for
 `Microsoft.Web/locations/staticSitesOperationStatuses/read`) to poll domain
 operations.
