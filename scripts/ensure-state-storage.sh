@@ -30,17 +30,50 @@ else
   echo "Reusing state storage account $state_account."
 fi
 
+# Read our own object ID from the Azure-issued token without a Graph lookup.
+# Never print or persist the token. The application/client ID is NOT the object ID.
+principal_id=$(az account get-access-token --resource https://management.azure.com/ \
+  --query accessToken -o tsv | python3 -c '
+import base64, json, sys, uuid
+payload = sys.stdin.read().strip().split(".")[1]
+claims = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
+print(uuid.UUID(claims["oid"]))
+')
+storage_scope="/subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$resource_group/providers/Microsoft.Storage/storageAccounts/$state_account"
+container_scope="$storage_scope/blobServices/default/containers/tfstate"
+blob_contributor=ba92f5b4-2d11-453d-a403-e96b0029c9fe
+blob_owner=b7e6dc6d-f1e8-4753-8033-0f276bb0955b
+# Include inherited assignments and existing container-scoped grants. A failed
+# lookup is fatal. Conditional grants are not assumed to cover Terraform access.
+role_count=$(az role assignment list --scope "$container_scope" --include-inherited \
+  --fill-principal-name false \
+  --query "length([?principalId=='$principal_id' && condition==null && (ends_with(roleDefinitionId, '$blob_contributor') || ends_with(roleDefinitionId, '$blob_owner'))])" -o tsv)
+if [[ "$role_count" == 0 ]]; then
+  echo 'Assigning Storage Blob Data Contributor on the Terraform state account.'
+  if ! az role assignment create --assignee-object-id "$principal_id" \
+    --assignee-principal-type ServicePrincipal --role "$blob_contributor" \
+    --scope "$storage_scope" --output none; then
+    echo '::error::Cannot assign the state storage role. The workflow identity needs roleAssignments/write on this account (for example Owner on sevgi-qr). Contributor alone cannot assign roles. An administrator can instead grant Storage Blob Data Contributor directly.'
+    exit 1
+  fi
+else
+  echo 'An applicable blob data role already exists; skipping role assignment.'
+fi
+
 # Idempotent: creates a private container if absent, preserving existing state.
-# Retry briefly for new account provisioning and recently granted RBAC access.
-for attempt in 1 2 3 4 5 6; do
+# Allow up to ten minutes for new RBAC grants to propagate. Verify blob listing
+# too: successfully creating an existing container does not prove blob access.
+for attempt in $(seq 1 31); do
   if az storage container create --account-name "$state_account" --name tfstate \
-    --auth-mode login --output none; then
+    --auth-mode login --output none && \
+    az storage blob list --account-name "$state_account" --container-name tfstate \
+      --auth-mode login --num-results 1 --output none; then
     echo 'Terraform state storage is ready.'
     exit 0
   fi
-  if [[ "$attempt" -lt 6 ]]; then
-    echo "State container not ready (attempt $attempt/6); retrying in 10 seconds."
-    sleep 10
+  if [[ "$attempt" -lt 31 ]]; then
+    echo "State blob access not ready (attempt $attempt/31); retrying in 20 seconds."
+    sleep 20
   fi
 done
 echo '::error::Cannot access the tfstate container. Check storage networking and grant the deployment identity Storage Blob Data Contributor on the state account (or sevgi-qr resource group before account creation). Owner/Contributor alone is insufficient. No storage keys are used.'

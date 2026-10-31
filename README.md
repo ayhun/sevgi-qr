@@ -22,11 +22,19 @@ or digits). New accounts use Standard LRS, disable shared keys and public blob
 access, and enable versioning and 14-day blob soft deletion; storage incurs Azure
 usage charges. Even plan-only production runs may create this backend storage.
 
-For automatic creation, an administrator must first grant the identity
-**Contributor** and **Storage Blob Data Contributor** on the `sevgi-qr` resource
-group and register `Microsoft.Storage` in the subscription. Allow time for RBAC
-propagation. The workflow does not assign itself roles or register subscription
-providers. Set `AZURE_TENANT_ID` and `TF_STATE_STORAGE_ACCOUNT` under the GitHub
+The workflow checks for an existing Storage Blob Data Contributor/Owner grant
+on `tfstate`, including inherited grants. If missing, it assigns itself
+**Storage Blob Data Contributor on the state storage account only**. Creating
+that assignment requires `Microsoft.Authorization/roleAssignments/write`, for
+example through an existing **Owner** role on `sevgi-qr`. It never grants itself
+Owner or subscription-wide permissions. Alternatively, an administrator can
+preassign the blob role and leave the workflow with Contributor for deployment.
+Conditional/custom roles are not treated as equivalent by this check.
+
+An administrator must register `Microsoft.Storage` in the subscription; the
+workflow does not register subscription providers. It retries container creation
+and blob listing for up to ten minutes for RBAC propagation before Terraform init.
+Set `AZURE_TENANT_ID` and `TF_STATE_STORAGE_ACCOUNT` under the GitHub
 `production` environment's **Variables**, not Secrets. Then run the workflow.
 
 Alternatively, use the administrator bootstrap below to pre-create storage and
