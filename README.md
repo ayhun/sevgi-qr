@@ -70,7 +70,33 @@ grant narrower, container-scoped blob permissions:
   setup-terraform and Azure login actions. Runner OS upgrades are intentional,
   rather than following changes to `ubuntu-latest`.
 
-The initial Terraform configuration only reads the existing resource group's ID and location. **No application hosting resources are defined yet.** The first workflow run verifies federation, state storage and access. Future resources should use `data.azurerm_resource_group.app.name` and `.location`.
+Terraform defines one **Azure Static Web App on the Free plan**, named `sevgi-qr`
+in West Europe, inside the existing resource group. No API, database, paid App
+Service plan, Front Door, DNS zone, or monitoring resources are provisioned.
+The remote Terraform state account is separately metered Azure Storage; this
+configuration does not guarantee a zero Azure bill.
+
+## Provision hosting
+
+1. Ensure `Microsoft.Web` is registered in the target subscription. If the
+   workflow preflight reports it is not, a subscription administrator can run
+   `az provider register --namespace Microsoft.Web --subscription f90ff751-313f-4e7a-a475-8d252d80c41a --wait`.
+2. Review the production plan from the push. For a fresh hosting deployment it
+   should add exactly one `azurerm_static_web_app.qr` resource on the Free SKU.
+3. Run **Actions → Terraform → Run workflow → operation: apply** on `main`.
+   Pushes still only plan; they do not apply application infrastructure.
+4. The successful run summary provides the Azure HTTPS URL and the CNAME target
+   for `qr.sgkafali.com`. Add only a `qr` CNAME at the current DNS provider;
+   leave the portfolio's apex and `www` records unchanged.
+
+Hosting creation does not deploy the QR application. Frontend deployment and
+the Azure custom-domain binding come next, after the app exists and DNS is
+ready. Until binding and certificate provisioning complete, use the generated
+Azure hostname. No custom domain is created prematurely by this stack.
+
+The provider stores the sensitive deployment API key in Terraform state. It is
+not exposed through Terraform outputs or the workflow summary. Keep state
+storage access restricted.
 
 Provider auto-registration is disabled because the identity is resource-group-scoped. An administrator must register additional service namespaces when needed. Contributor cannot create runtime IAM role assignments; those require separate authorization.
 
