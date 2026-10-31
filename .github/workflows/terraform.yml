@@ -40,7 +40,7 @@ jobs:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     environment: production
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     concurrency:
       group: terraform-production
       cancel-in-progress: false
@@ -96,7 +96,8 @@ jobs:
             echo '## QR hosting provisioned'
             echo "Azure URL: $(terraform output -raw static_web_app_url)"
             echo ''
-            echo "DNS: create a CNAME named qr under sgkafali.com pointing to $(terraform output -raw qr_domain_cname_target)."
+            echo "Custom URL: $(terraform output -raw qr_url)"
+            echo "DNS: keep the DNS-only CNAME named qr under sgkafali.com pointing to $(terraform output -raw qr_domain_cname_target)."
             echo ''
-            echo 'Application content deployment and custom-domain binding are separate next steps.'
+            echo 'Azure manages the custom-domain HTTPS certificate. Application content deployment is a separate next step.'
           } >> "$GITHUB_STEP_SUMMARY"

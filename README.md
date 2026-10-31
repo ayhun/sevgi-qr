@@ -82,17 +82,19 @@ configuration does not guarantee a zero Azure bill.
    workflow preflight reports it is not, a subscription administrator can run
    `az provider register --namespace Microsoft.Web --subscription f90ff751-313f-4e7a-a475-8d252d80c41a --wait`.
 2. Review the production plan from the push. For a fresh hosting deployment it
-   should add exactly one `azurerm_static_web_app.qr` resource on the Free SKU.
+   adds `azurerm_static_web_app.qr` on the Free SKU and its custom-domain binding.
+   With hosting already provisioned, only the custom-domain binding should be added.
 3. Run **Actions → Terraform → Run workflow → operation: apply** on `main`.
    Pushes still only plan; they do not apply application infrastructure.
 4. The successful run summary provides the Azure HTTPS URL and the CNAME target
    for `qr.sgkafali.com`. Add only a `qr` CNAME at the current DNS provider;
    leave the portfolio's apex and `www` records unchanged.
 
-Hosting creation does not deploy the QR application. Frontend deployment and
-the Azure custom-domain binding come next, after the app exists and DNS is
-ready. Until binding and certificate provisioning complete, use the generated
-Azure hostname. No custom domain is created prematurely by this stack.
+Hosting creation does not deploy the QR application. Terraform also binds
+`qr.sgkafali.com` with CNAME validation; the DNS-only Cloudflare CNAME was verified
+before enabling this resource. Keep that record in place for Azure validation
+and managed HTTPS. Until binding and certificate provisioning complete, use the
+generated Azure hostname. Frontend deployment remains a separate next step.
 
 The provider stores the sensitive deployment API key in Terraform state. It is
 not exposed through Terraform outputs or the workflow summary. Keep state

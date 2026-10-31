@@ -15,6 +15,18 @@ resource "azurerm_static_web_app" "qr" {
   }
 }
 
+# DNS remains managed in Cloudflare. Its DNS-only CNAME has been verified.
+resource "azurerm_static_web_app_custom_domain" "qr" {
+  static_web_app_id = azurerm_static_web_app.qr.id
+  domain_name       = "qr.sgkafali.com"
+  validation_type   = "cname-delegation"
+}
+
+output "qr_url" {
+  description = "Custom HTTPS endpoint; Azure manages the certificate."
+  value       = "https://${azurerm_static_web_app_custom_domain.qr.domain_name}"
+}
+
 output "static_web_app_name" {
   description = "Hosting resource for the browser-only QR generator."
   value       = azurerm_static_web_app.qr.name
@@ -26,7 +38,7 @@ output "static_web_app_url" {
 }
 
 output "qr_domain_cname_target" {
-  description = "Create a CNAME named qr in sgkafali.com pointing here. Bind the custom domain after DNS is ready."
+  description = "Keep the DNS-only Cloudflare CNAME named qr pointing here."
   value       = azurerm_static_web_app.qr.default_host_name
 }
 
