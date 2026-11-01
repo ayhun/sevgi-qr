@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { defaults, renderDesign } from '../src/design.js';
 
-test('default and reset design use black ink', () => {
+test('default and reset design use black ink and frame color', () => {
   assert.equal(defaults.color, '#000000');
+  assert.equal(defaults.frameColor, '#000000');
   assert.ok(renderDesign('https://sgkafali.com').svg.includes('fill="#000000"'));
+  assert.ok(renderDesign('https://sgkafali.com', { frame: 'bottom' }).svg.includes('rx="14" fill="#000000"'));
 });
 test('dashboard routes require authentication while generator stays public', () => {
   const config = JSON.parse(readFileSync(new URL('../public/staticwebapp.config.json', import.meta.url)));

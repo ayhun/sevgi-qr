@@ -1,6 +1,6 @@
 import QRCode from 'qrcode';
 
-export const defaults = { frame: 'none', caption: 'SCAN ME', font: 'sans-serif', frameColor: '#1d5849', shape: 'square', eye: 'square', background: '#ffffff', color: '#000000', logo: '', clearLogo: true };
+export const defaults = { frame: 'none', caption: 'SCAN ME', font: 'sans-serif', frameColor: '#000000', shape: 'square', eye: 'square', background: '#ffffff', color: '#000000', logo: '', clearLogo: true };
 const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[char]));
 const rect = (x, y, w, h, color, radius = 0) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${radius}" fill="${color}"/>`;
 
