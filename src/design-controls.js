@@ -23,13 +23,24 @@ export function designControls(host, onChange, icons) {
     if (options) for (const [value, text] of options) input.add(new Option(text, value));
     input.value = state[key]; if (type === 'checkbox') input.checked = state[key];
     if (key === 'caption') input.maxLength = 40;
-    input.addEventListener('input', () => { state[key] = type === 'checkbox' ? input.checked : input.value; onChange(); });
+    input.addEventListener('input', () => { state[key] = type === 'checkbox' ? input.checked : input.value; if (key === 'color') syncFrameColor(); onChange(); });
     wrapper.append(input); panels[category].append(wrapper); controls.push([input, key]);
   }
   control('Frame', 'frame', 'Frame style', [['none', 'No frame'], ['bottom', 'Caption below'], ['top', 'Caption above'], ['phone', 'Phone']]);
   control('Frame', 'caption', 'Frame phrase', null, 'text');
   control('Frame', 'font', 'Phrase font', [['sans-serif', 'Sans serif'], ['serif', 'Serif'], ['monospace', 'Monospace']]);
-  control('Frame', 'frameColor', 'Frame color', null, 'color');
+  const matchLabel = document.createElement('label'); matchLabel.className = 'frame-match';
+  const matchInput = document.createElement('input'); matchInput.type = 'checkbox'; matchInput.checked = state.frameMatchesInk;
+  matchInput.id = 'design-frameMatchesInk'; matchLabel.append(matchInput, document.createTextNode('Use ink color for frame'));
+  panels.Frame.append(matchLabel);
+  matchInput.addEventListener('change', () => { state.frameMatchesInk = matchInput.checked; syncFrameColor(); onChange(); });
+  control('Frame', 'frameColor', 'Custom frame color', null, 'color');
+  function syncFrameColor() {
+    const input = host.querySelector('#design-frameColor');
+    input.disabled = state.frameMatchesInk;
+    input.value = state.frameMatchesInk ? state.color : state.frameColor;
+  }
+  syncFrameColor();
   control('Shape', 'shape', 'Module shape', [['square', 'Squares'], ['rounded', 'Rounded'], ['dots', 'Dots']]);
   control('Shape', 'eye', 'Corner shape', [['square', 'Square'], ['rounded', 'Rounded']]);
   control('Shape', 'color', 'QR color', null, 'color');
@@ -75,6 +86,7 @@ export function designControls(host, onChange, icons) {
   host.querySelector('#reset-design').addEventListener('click', () => {
     uploadVersion++; Object.assign(state, defaults); upload.value = ''; status.textContent = ''; markLogo('none');
     for (const [input, key] of controls) { input.value = state[key]; if (input.type === 'checkbox') input.checked = state[key]; }
+    matchInput.checked = state.frameMatchesInk; syncFrameColor();
     onChange();
   });
   markLogo('none');

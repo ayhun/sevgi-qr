@@ -12,6 +12,8 @@
 .design-panel input,.design-panel select{width:100%;min-width:0}
 .design-panel input[type=color]{height:43px;padding:4px;cursor:pointer}
 .design-panel input[type=checkbox]{width:20px;height:20px;accent-color:var(--green)}
+.design-panel .frame-match{grid-column:1/-1;display:flex;flex-direction:row;align-items:center;gap:10px;font-weight:500}
+.design-panel input[type=color]:disabled{cursor:not-allowed;opacity:.65}
 .design-panel input[type=file]{font-size:11px;padding:8px}
 .design-panel .hint,.logo-choices{grid-column:1/-1}
 .design-panel label:has(input[type=file]){grid-column:1/-1}

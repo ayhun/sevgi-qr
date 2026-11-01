@@ -1,6 +1,6 @@
 import QRCode from 'qrcode';
 
-export const defaults = { frame: 'none', caption: 'SCAN ME', font: 'sans-serif', frameColor: '#000000', shape: 'square', eye: 'square', background: '#ffffff', color: '#000000', logo: '', clearLogo: true };
+export const defaults = { frame: 'none', caption: 'SCAN ME', font: 'sans-serif', frameMatchesInk: true, frameColor: '#000000', shape: 'square', eye: 'square', background: '#ffffff', color: '#000000', logo: '', clearLogo: true };
 const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[char]));
 const rect = (x, y, w, h, color, radius = 0) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${radius}" fill="${color}"/>`;
 
@@ -14,7 +14,7 @@ export function renderDesign(payload, design = {}, correction = 'M') {
   const bottom = framed && d.frame !== 'top' ? 64 : 0;
   const width = box + pad * 2, height = box + pad * 2 + top + bottom;
   let svg = rect(0, 0, width, height, d.background);
-  if (framed) svg += rect(2, 2, width - 4, height - 4, d.frameColor, d.frame === 'phone' ? 30 : 14);
+  if (framed) svg += rect(2, 2, width - 4, height - 4, d.frameMatchesInk ? d.color : d.frameColor, d.frame === 'phone' ? 30 : 14);
   svg += rect(pad, pad + top, box, box, d.background, framed ? 6 : 0);
   const ox = pad + 40, oy = pad + top + 40;
   const finder = (r, c) => (r < 7 && c < 7) || (r < 7 && c >= n - 7) || (r >= n - 7 && c < 7);

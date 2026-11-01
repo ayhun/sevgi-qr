@@ -5,9 +5,12 @@ import { defaults, renderDesign } from '../src/design.js';
 
 test('default and reset design use black ink and frame color', () => {
   assert.equal(defaults.color, '#000000');
+  assert.equal(defaults.frameMatchesInk, true);
   assert.equal(defaults.frameColor, '#000000');
   assert.ok(renderDesign('https://sgkafali.com').svg.includes('fill="#000000"'));
   assert.ok(renderDesign('https://sgkafali.com', { frame: 'bottom' }).svg.includes('rx="14" fill="#000000"'));
+  assert.ok(renderDesign('https://sgkafali.com', { frame: 'bottom', color: '#1d5849' }).svg.includes('rx="14" fill="#1d5849"'));
+  assert.ok(renderDesign('https://sgkafali.com', { frame: 'bottom', color: '#1d5849', frameMatchesInk: false, frameColor: '#dc2626' }).svg.includes('rx="14" fill="#dc2626"'));
 });
 test('dashboard routes require authentication while generator stays public', () => {
   const config = JSON.parse(readFileSync(new URL('../public/staticwebapp.config.json', import.meta.url)));

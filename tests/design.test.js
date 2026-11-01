@@ -23,6 +23,15 @@ test('logo with a caption frame decodes', async () => {
   const output = canvas.getContext('2d'); output.drawImage(await loadImage(Buffer.from(svg)), 0, 0, canvas.width, canvas.height);
   assert.equal(jsQR(output.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height)?.data, payload);
 });
+for (const color of ['#dc2626', '#ea580c']) {
+  test(`${color} ink remains scannable`, async () => {
+    const payload = 'https://sgkafali.com';
+    const { svg, width, height } = renderDesign(payload, { color });
+    const canvas = createCanvas(1024, Math.round(1024 * height / width));
+    const ctx = canvas.getContext('2d'); ctx.drawImage(await loadImage(Buffer.from(svg)), 0, 0, canvas.width, canvas.height);
+    assert.equal(jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height)?.data, payload);
+  });
+}
 test('caption is escaped and untrusted image URLs rejected', () => {
   assert.ok(renderDesign('hello', { frame: 'top', caption: '<script>&' }).svg.includes('&lt;script&gt;&amp;'));
   assert.throws(() => renderDesign('hello', { logo: 'https://example.com/logo.png' }));

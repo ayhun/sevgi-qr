@@ -33,11 +33,10 @@ const types = {
 };
 const $ = id => document.getElementById(id);
 let selected = 'link';
-let ink = '#000000';
 let revision = 0;
 let timer;
 let ready = null;
-const design = designControls($('design-controls'), () => { ink = design.color; updateColors(); update(); }, icons);
+const design = designControls($('design-controls'), () => { updateColors(); update(); }, icons);
 const values = Object.fromEntries(Object.keys(types).map(key => [key, {}]));
 const managedUrl = managedUrlOf(new URLSearchParams(location.search).get('managed'), location.origin);
 values.link.url = managedUrl || 'https://sgkafali.com';
@@ -53,15 +52,15 @@ for (const [key, type] of Object.entries(types)) {
   button.addEventListener('click', () => { selected = key; renderFields(); update(); });
   $('types').append(button);
 }
-for (const [color, name] of [['#000000', 'Black'], ['#1d5849', 'Green'], ['#1e40af', 'Blue'], ['#6b21a8', 'Purple'], ['#991b1b', 'Red'], ['#9a3412', 'Orange']]) {
+for (const [color, name] of [['#000000', 'Black'], ['#1d5849', 'Green'], ['#1e40af', 'Blue'], ['#6b21a8', 'Purple'], ['#dc2626', 'Red'], ['#ea580c', 'Orange']]) {
   const button = document.createElement('button');
   button.type = 'button'; button.className = 'swatch'; button.style.background = color;
   button.setAttribute('aria-label', name); button.title = name; button.dataset.color = color; button.innerHTML = '<span aria-hidden="true"></span>';
-  button.addEventListener('click', () => { ink = color; design.color = color; $('design-color').value = color; updateColors(); update(); });
+  button.addEventListener('click', () => { const input = $('design-color'); input.value = color; input.dispatchEvent(new Event('input', { bubbles: true })); });
   $('colors').append(button);
 }
 function updateColors() {
-  for (const button of $('colors').children) { const active = button.dataset.color === ink; button.setAttribute('aria-pressed', String(active)); button.firstChild.textContent = active ? '✓' : ''; }
+  for (const button of $('colors').children) { const active = button.dataset.color === design.color; button.setAttribute('aria-pressed', String(active)); button.firstChild.textContent = active ? '✓' : ''; }
 }
 function renderFields() {
   const type = types[selected];
