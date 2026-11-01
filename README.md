@@ -157,7 +157,9 @@ Sign-out uses `/.auth/logout`. University/work tenants may require admin consent
 
 Managed links use a separate Standard LRS Azure Storage account with two Tables.
 The API is a managed Azure Functions app inside the existing Free Static Web App.
-Only `/api/r/{owner}/{id}` is public; `/api/links*` is protected at the edge and
+The public QR URL is `/r/{owner}/{id}`. A small static page forwards browser
+visits to the public `/api/r/{owner}/{id}` Function; this requires JavaScript
+and may not work in non-browser link previewers. `/api/links*` is protected at the edge and
 each API handler also checks the signed-in user ID. Link records are partitioned
 by a hash of the Static Web Apps user ID. The application stores a daily scan
 count, not individual visitor records or IP addresses. Counts can include bots

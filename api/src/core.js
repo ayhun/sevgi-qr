@@ -4,9 +4,9 @@ const headers = { 'Cache-Control': 'no-store', 'Content-Type': 'application/json
 const response = (status, body) => ({ status, jsonBody: body, headers });
 const missing = error => error?.statusCode === 404 || error?.code === 'ResourceNotFound' || error?.code === 'EntityNotFound';
 const conflict = error => error?.statusCode === 409 || error?.statusCode === 412;
-const safeSlug = value => /^[a-f0-9]{20}$/.test(value || '');
-const safeOwner = value => /^[a-f0-9]{24}$/.test(value || '');
-const strip = item => ({ id: item.rowKey, title: item.title, destination: item.destination, active: item.active, createdAt: item.createdAt, updatedAt: item.updatedAt, shortUrl: `/api/r/${item.partitionKey}/${item.rowKey}` });
+const safeSlug = value => /^[a-f0-9]{12}$/.test(value || '');
+const safeOwner = value => /^[a-f0-9]{16}$/.test(value || '');
+const strip = item => ({ id: item.rowKey, title: item.title, destination: item.destination, active: item.active, createdAt: item.createdAt, updatedAt: item.updatedAt, shortUrl: `/r/${item.partitionKey}/${item.rowKey}` });
 
 export function principalOf(request) {
   const encoded = request.headers.get('x-ms-client-principal');
@@ -18,7 +18,7 @@ export function principalOf(request) {
   } catch { return null; }
 }
 
-export const ownerOf = userId => createHash('sha256').update(userId).digest('hex').slice(0, 24);
+export const ownerOf = userId => createHash('sha256').update(userId).digest('hex').slice(0, 16);
 export function destinationOf(input) {
   if (typeof input !== 'string' || input.length > 2048) throw new Error('Enter a website URL under 2,048 characters.');
   let url;
@@ -34,7 +34,7 @@ export function titleOf(input) {
 
 // These handlers receive injected Table clients, keeping storage and auth
 // behavior testable without connecting to Azure or inventing a local identity.
-export function createHandlers({ links, scans, now = () => new Date(), random = () => randomBytes(10).toString('hex') }) {
+export function createHandlers({ links, scans, now = () => new Date(), random = () => randomBytes(6).toString('hex') }) {
   async function list(request) {
     const principal = principalOf(request); if (!principal) return response(401, { error: 'Sign in with Microsoft.' });
     const owner = ownerOf(principal.userId), items = [];

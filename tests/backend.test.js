@@ -24,17 +24,18 @@ const unauthorized = () => ({ headers: new Headers(), json: async () => ({}) });
 
 test('links belong to their Microsoft account; destination edits preserve the printed URL', async () => {
   const links = new Table(), scans = new Table();
-  const handlers = createHandlers({ links, scans, random: () => 'a'.repeat(20), now: () => new Date('2026-11-01T12:00:00Z') });
+  const handlers = createHandlers({ links, scans, random: () => 'a'.repeat(12), now: () => new Date('2026-11-01T12:00:00Z') });
   assert.equal((await handlers.create(unauthorized())).status, 401);
   const created = await handlers.create(request('alice', { title: 'Poster', destination: 'https://example.org/one' }));
   assert.equal(created.status, 201);
   const { id, shortUrl } = created.jsonBody.link;
+  assert.match(shortUrl, /^\/r\/[a-f0-9]{16}\/[a-f0-9]{12}$/);
   assert.equal((await handlers.list(request('bob'))).jsonBody.links.length, 0);
   assert.equal((await handlers.update(request('bob', { destination: 'https://evil.example' }), id)).status, 404);
   const updated = await handlers.update(request('alice', { destination: 'https://example.org/two' }), id);
   assert.equal(updated.jsonBody.link.shortUrl, shortUrl);
   assert.equal(updated.jsonBody.link.destination, 'https://example.org/two');
-  const [, , , owner, slug] = shortUrl.split('/');
+  const [, , owner, slug] = shortUrl.split('/');
   const first = await handlers.redirect(owner, slug);
   assert.equal(first.status, 302); assert.equal(first.headers.Location, 'https://example.org/two');
   assert.equal((await handlers.stats(request('bob'), id)).status, 404);
@@ -47,5 +48,5 @@ test('rejects unsafe destinations and malformed identity', async () => {
   const handlers = createHandlers({ links: new Table(), scans: new Table() });
   assert.equal((await handlers.list(unauthorized())).status, 401);
   assert.equal((await handlers.redirect('bad', 'bad')).status, 404);
-  assert.equal(ownerOf('alice').length, 24);
+  assert.equal(ownerOf('alice').length, 16);
 });
