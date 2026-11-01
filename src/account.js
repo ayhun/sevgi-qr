@@ -106,6 +106,8 @@ if (location.pathname.replace(/\/$/, '') === '/dashboard') {
     const actions = element('div', 'managed-actions');
     const design = element('a', 'sign-in', 'Design QR code');
     design.href = `/?managed=${encodeURIComponent(urlFor(link))}#generator`;
+    const csv = element('a', 'text-button', 'Download full history (CSV)');
+    csv.href = `/api/links/${encodeURIComponent(link.id)}/stats.csv`;
     actions.append(design,
       action('Copy link', async () => { try { await navigator.clipboard.writeText(urlFor(link)); setMessage('Managed link copied.'); } catch { setMessage('Copy unavailable. Select the link text above.', true); } }),
       action('Edit', () => { editor.hidden = !editor.hidden; if (!editor.hidden) editor.querySelector('input').focus(); }),
@@ -113,7 +115,7 @@ if (location.pathname.replace(/\/$/, '') === '/dashboard') {
         try { await api(`/api/links/${link.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !link.active }) }); setMessage(link.active ? 'Link paused.' : 'Link resumed.'); await loadLinks(); }
         catch (error) { setMessage(error.message, true); }
       }),
-      action('Daily counts (90 days)', async () => {
+      action('Daily counts', async () => {
         stats.hidden = !stats.hidden; if (stats.hidden) return;
         stats.textContent = 'Loading counts…';
         try {
@@ -121,6 +123,7 @@ if (location.pathname.replace(/\/$/, '') === '/dashboard') {
           showDailyCounts(stats, data.days, data.note, link.id);
         } catch (error) { stats.textContent = error.message; }
       }),
+      csv,
       action('Delete', async event => {
         if (!window.confirm('Permanently delete this managed link? Its QR code will stop working, and its scan counts will be removed. This cannot be undone.')) return;
         const button = event.currentTarget; button.disabled = true;
