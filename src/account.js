@@ -64,10 +64,12 @@ if (location.pathname.replace(/\/$/, '') === '/dashboard') {
     return svg;
   }
 
-  function showDailyCounts(container, days, note) {
+  function showDailyCounts(container, days, note, linkId) {
     const controls = element('div', 'stats-controls');
     const tableButton = action('Table', () => selectView('table'));
     const chartButton = action('Bar chart', () => selectView('chart'));
+    const csv = element('a', 'text-button', 'Download full history (CSV)');
+    csv.href = `/api/links/${encodeURIComponent(linkId)}/stats.csv`;
     const tableView = element('div', 'stats-view');
     const chartView = element('div', 'stats-view');
     chartView.append(dailyChart(days));
@@ -85,8 +87,12 @@ if (location.pathname.replace(/\/$/, '') === '/dashboard') {
       tableButton.setAttribute('aria-pressed', String(!chart));
       chartButton.setAttribute('aria-pressed', String(chart));
     }
-    controls.append(tableButton, chartButton);
-    container.replaceChildren(element('h3', 'stats-title', 'Last 90 days'), controls, tableView, chartView, element('p', 'hint', note));
+    controls.append(tableButton, chartButton, csv);
+    container.replaceChildren(
+      element('h3', 'stats-title', 'Daily counts · last 90 days'),
+      element('p', 'stats-scope', 'The table and chart show only the last 90 UTC days. Download the CSV for all recorded daily counts.'),
+      controls, tableView, chartView, element('p', 'hint', note)
+    );
     selectView('table');
   }
 
@@ -107,15 +113,14 @@ if (location.pathname.replace(/\/$/, '') === '/dashboard') {
         try { await api(`/api/links/${link.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !link.active }) }); setMessage(link.active ? 'Link paused.' : 'Link resumed.'); await loadLinks(); }
         catch (error) { setMessage(error.message, true); }
       }),
-      action('Daily counts', async () => {
+      action('Daily counts (90 days)', async () => {
         stats.hidden = !stats.hidden; if (stats.hidden) return;
         stats.textContent = 'Loading counts…';
         try {
           const data = await api(`/api/links/${link.id}/stats`);
-          showDailyCounts(stats, data.days, data.note);
+          showDailyCounts(stats, data.days, data.note, link.id);
         } catch (error) { stats.textContent = error.message; }
       }),
-      (() => { const csv = element('a', 'text-button', 'Download CSV'); csv.href = `/api/links/${encodeURIComponent(link.id)}/stats.csv`; return csv; })(),
       action('Delete', async event => {
         if (!window.confirm('Permanently delete this managed link? Its QR code will stop working, and its scan counts will be removed. This cannot be undone.')) return;
         const button = event.currentTarget; button.disabled = true;

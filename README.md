@@ -176,11 +176,11 @@ and repeat scans. Counting stops at 10,000 per link per UTC day, while redirects
 continue. The dashboard limits accounts to 100 managed links. These are usage
 guardrails, not a hard spending cap.
 
-Each managed link has a **Download CSV** action. The authenticated export includes
-the complete daily count history (newest first), with `date_utc,scans` columns.
-The dashboard offers table and bar-chart views for the last 90 UTC calendar
-days; the chart shows unrecorded days as zero. An unscanned link downloads a
-header-only CSV.
+Each managed link's Daily counts panel explicitly limits its table and bar chart
+to the last 90 UTC calendar days, and provides a **Download full history (CSV)**
+link for all recorded daily counts. The authenticated export lists newest dates
+first, with `date_utc,scans` columns. The chart shows unrecorded days as zero;
+an unscanned link downloads a header-only CSV.
 
 Terraform creates a €5 monthly budget on the `sevgi-qr` resource group, with
 50% and 100% alerts to `ayhuntekat@gmail.com` and `sevgikafalii@gmail.com`.

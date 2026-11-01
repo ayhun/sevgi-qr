@@ -55,3 +55,6 @@
 .chart-bar{fill:var(--green)}
 .chart-bar:hover{fill:#397c64}
 .chart-label{fill:var(--muted);font:11px 'DM Mono',monospace}
+.stats-scope{margin:0 0 12px!important;font-size:12px!important;line-height:1.6!important}
+.stats-controls{align-items:center;flex-wrap:wrap}
+.stats-controls a{margin-left:auto}
