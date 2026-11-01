@@ -48,7 +48,7 @@ for (const [key, type] of Object.entries(types)) {
   button.addEventListener('click', () => { selected = key; renderFields(); update(); });
   $('types').append(button);
 }
-for (const [color, name] of [['#000000', 'Black'], ['#18231f', 'Charcoal'], ['#203e66', 'Navy'], ['#1d5849', 'Forest'], ['#115e59', 'Teal'], ['#1e40af', 'Blue'], ['#4338ca', 'Indigo'], ['#6b21a8', 'Purple'], ['#9d174d', 'Berry'], ['#991b1b', 'Red'], ['#9a3412', 'Rust'], ['#713f12', 'Brown']]) {
+for (const [color, name] of [['#000000', 'Black'], ['#1d5849', 'Green'], ['#1e40af', 'Blue'], ['#6b21a8', 'Purple'], ['#991b1b', 'Red'], ['#9a3412', 'Orange']]) {
   const button = document.createElement('button');
   button.type = 'button'; button.className = 'swatch'; button.style.background = color;
   button.setAttribute('aria-label', name); button.title = name; button.dataset.color = color; button.innerHTML = '<span aria-hidden="true"></span>';
