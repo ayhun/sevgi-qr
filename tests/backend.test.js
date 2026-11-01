@@ -76,7 +76,7 @@ test('link-code collisions are retried within an owner partition', async () => {
 });
 test('daily count CSV is owner-only and exports full history', async () => {
   const links = new Table(), scans = new Table();
-  const handlers = createHandlers({ links, scans, random: () => 'ABC123' });
+  const handlers = createHandlers({ links, scans, random: () => 'ABC123', now: () => new Date('2026-04-01T12:00:00Z') });
   const created = await handlers.create(request('alice', { destination: 'https://example.org' }));
   const { id, shortUrl } = created.jsonBody.link;
   const [, , , owner, slug] = shortUrl.split('/');
@@ -102,6 +102,7 @@ test('daily count CSV is owner-only and exports full history', async () => {
   assert.equal(rows[1], '2026-04-01,91');
   assert.equal(rows.at(-1), '2026-01-01,1');
   assert.equal((await handlers.stats(request('alice'), id)).jsonBody.days.length, 90);
+  assert.equal((await handlers.stats(request('alice'), id)).jsonBody.days.at(-1).date, '2026-01-02');
 });
 test('previously issued managed links remain visible and editable', async () => {
   const links = new Table(), scans = new Table();

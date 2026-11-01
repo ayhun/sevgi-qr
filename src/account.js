@@ -1,3 +1,5 @@
+import { last90Days } from './daily-counts.js';
+
 // Azure Static Web Apps supplies identity and protects dashboard/API routes.
 if (location.pathname.replace(/\/$/, '') === '/dashboard') {
   document.body.classList.add('dashboard-view');
@@ -28,6 +30,66 @@ if (location.pathname.replace(/\/$/, '') === '/dashboard') {
   const action = (text, callback) => { const button = element('button', 'text-button', text); button.type = 'button'; button.addEventListener('click', callback); return button; };
   const urlFor = link => new URL(link.shortUrl, location.origin).href;
 
+  function dailyChart(days) {
+    const series = last90Days(days);
+    const total = series.reduce((sum, day) => sum + day.scans, 0);
+    const maximum = Math.max(1, ...series.map(day => day.scans));
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 900 220');
+    svg.setAttribute('class', 'daily-chart');
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', `Daily scan counts for the last 90 UTC days. ${total} scans in total. Switch to table for exact values.`);
+    const svgNode = (tag, attributes, content) => {
+      const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, String(value));
+      if (content !== undefined) node.textContent = content;
+      return node;
+    };
+    const baseline = 176, height = 144, xStart = 44, step = 9.25;
+    for (const fraction of [0, .5, 1]) {
+      const y = baseline - height * fraction;
+      svg.append(svgNode('line', { x1: xStart, x2: 884, y1: y, y2: y, class: 'chart-grid' }));
+      svg.append(svgNode('text', { x: 34, y: y + 4, 'text-anchor': 'end', class: 'chart-label' }, String(Math.round(maximum * fraction))));
+    }
+    series.forEach((day, index) => {
+      const barHeight = height * day.scans / maximum;
+      const bar = svgNode('rect', { x: xStart + index * step, y: baseline - barHeight, width: 6.25, height: barHeight, class: 'chart-bar' });
+      bar.append(svgNode('title', {}, `${day.date}: ${day.scans} scans`));
+      svg.append(bar);
+      if (index % 15 === 0 || index === 89) {
+        const label = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${day.date}T00:00:00Z`));
+        svg.append(svgNode('text', { x: xStart + index * step + 3, y: 205, 'text-anchor': index === 89 ? 'end' : 'middle', class: 'chart-label' }, label));
+      }
+    });
+    return svg;
+  }
+
+  function showDailyCounts(container, days, note) {
+    const controls = element('div', 'stats-controls');
+    const tableButton = action('Table', () => selectView('table'));
+    const chartButton = action('Bar chart', () => selectView('chart'));
+    const tableView = element('div', 'stats-view');
+    const chartView = element('div', 'stats-view');
+    chartView.append(dailyChart(days));
+    if (!days.length) tableView.append(element('p', '', 'No scans recorded in the last 90 days.'));
+    else {
+      const table = element('table', 'stats-table');
+      const head = element('tr'); head.append(element('th', '', 'Date (UTC)'), element('th', '', 'Scans'));
+      table.append(head);
+      for (const day of days) { const row = element('tr'); row.append(element('td', '', day.date), element('td', '', String(day.scans))); table.append(row); }
+      tableView.append(table);
+    }
+    function selectView(view) {
+      const chart = view === 'chart';
+      tableView.hidden = chart; chartView.hidden = !chart;
+      tableButton.setAttribute('aria-pressed', String(!chart));
+      chartButton.setAttribute('aria-pressed', String(chart));
+    }
+    controls.append(tableButton, chartButton);
+    container.replaceChildren(element('h3', 'stats-title', 'Last 90 days'), controls, tableView, chartView, element('p', 'hint', note));
+    selectView('table');
+  }
+
   function renderLink(link) {
     const card = element('article', 'managed-card');
     const heading = element('div', 'managed-card-heading');
@@ -50,16 +112,7 @@ if (location.pathname.replace(/\/$/, '') === '/dashboard') {
         stats.textContent = 'Loading counts…';
         try {
           const data = await api(`/api/links/${link.id}/stats`);
-          stats.replaceChildren();
-          if (!data.days.length) stats.append(element('p', '', 'No scans recorded yet.'));
-          else {
-            const table = element('table', 'stats-table');
-            const head = element('tr'); head.append(element('th', '', 'Date (UTC)'), element('th', '', 'Scans'));
-            table.append(head);
-            for (const day of data.days) { const row = element('tr'); row.append(element('td', '', day.date), element('td', '', String(day.scans))); table.append(row); }
-            stats.append(table);
-          }
-          stats.append(element('p', 'hint', data.note));
+          showDailyCounts(stats, data.days, data.note);
         } catch (error) { stats.textContent = error.message; }
       }),
       (() => { const csv = element('a', 'text-button', 'Download CSV'); csv.href = `/api/links/${encodeURIComponent(link.id)}/stats.csv`; return csv; })(),

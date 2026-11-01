@@ -139,7 +139,10 @@ export function createHandlers({ links, scans, now = () => new Date(), random = 
   async function stats(request, slug) {
     const result = await readStats(request, slug);
     if (!Array.isArray(result)) return result;
-    return response(200, { days: result.slice(0, 90), note: 'Counts include repeat scans and may include automated scanners. No visitor IP addresses are stored.' });
+    const current = now();
+    const today = current.toISOString().slice(0, 10);
+    const first = new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth(), current.getUTCDate() - 89)).toISOString().slice(0, 10);
+    return response(200, { days: result.filter(day => day.date >= first && day.date <= today), note: 'Counts include repeat scans and may include automated scanners. No visitor IP addresses are stored.' });
   }
   async function statsCsv(request, slug) {
     const result = await readStats(request, slug);
