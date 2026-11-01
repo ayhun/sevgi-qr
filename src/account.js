@@ -61,7 +61,14 @@ if (location.pathname.replace(/\/$/, '') === '/dashboard') {
           }
           stats.append(element('p', 'hint', data.note));
         } catch (error) { stats.textContent = error.message; }
+      }),
+      action('Delete', async event => {
+        if (!window.confirm('Permanently delete this managed link? Its QR code will stop working, and its scan counts will be removed. This cannot be undone.')) return;
+        const button = event.currentTarget; button.disabled = true;
+        try { await api(`/api/links/${link.id}`, { method: 'DELETE' }); setMessage('Managed link and scan counts deleted.'); await loadLinks(); }
+        catch (error) { setMessage(error.message, true); button.disabled = false; }
       }));
+    actions.lastChild.classList.add('delete-action');
     const editor = element('form', 'managed-edit'); editor.hidden = true;
     const titleLabel = element('label', '', 'Link name'); const title = element('input'); title.value = link.title || ''; title.maxLength = 100; titleLabel.append(title);
     const destinationLabel = element('label', '', 'Destination URL'); const target = element('input'); target.type = 'url'; target.value = link.destination; target.required = true; target.maxLength = 2048; destinationLabel.append(target);

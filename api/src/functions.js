@@ -18,8 +18,9 @@ const fail = (error, context) => { context.error(error); return { status: 503, j
 app.http('links', { methods: ['GET', 'POST'], authLevel: 'anonymous', route: 'links', handler: async (request, context) => {
   try { return request.method === 'POST' ? await backend().create(request) : await backend().list(request); } catch (error) { return fail(error, context); }
 } });
-app.http('linkUpdate', { methods: ['PATCH'], authLevel: 'anonymous', route: 'links/{slug}', handler: async (request, context) => {
-  try { return await backend().update(request, request.params.slug); } catch (error) { return fail(error, context); }
+app.http('linkMutation', { methods: ['PATCH', 'DELETE'], authLevel: 'anonymous', route: 'links/{slug}', handler: async (request, context) => {
+  try { return request.method === 'DELETE' ? await backend().remove(request, request.params.slug) : await backend().update(request, request.params.slug); }
+  catch (error) { return fail(error, context); }
 } });
 app.http('linkStats', { methods: ['GET'], authLevel: 'anonymous', route: 'links/{slug}/stats', handler: async (request, context) => {
   try { return await backend().stats(request, request.params.slug); } catch (error) { return fail(error, context); }
