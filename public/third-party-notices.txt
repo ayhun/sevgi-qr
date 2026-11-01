@@ -1,4 +1,6 @@
 QR Studio uses node-qrcode (https://github.com/soldair/node-qrcode).
+QR Studio also uses jsQR (https://github.com/cozmo/jsQR), under Apache-2.0.
+The full jsQR license is provided in jsqr-LICENSE.txt alongside this file.
 The MIT License (MIT)
 Copyright (c) 2012 Ryan Day
 

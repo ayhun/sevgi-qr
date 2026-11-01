@@ -1,4 +1,6 @@
-import QRCode from 'qrcode';
+import jsQR from 'jsqr';
+import { renderDesign, rasterize } from './design.js';
+import { designControls } from './design-controls.js';
 import { buildPayload } from './payload.js';
 import './style.css';
 
@@ -33,6 +35,7 @@ let ink = '#1d5849';
 let revision = 0;
 let timer;
 let ready = null;
+const design = designControls($('design-controls'), () => { ink = design.color; updateColors(); update(); }, icons);
 const values = Object.fromEntries(Object.keys(types).map(key => [key, {}]));
 values.link.url = 'https://sgkafali.com';
 values.wifi.security = 'WPA';
@@ -48,7 +51,7 @@ for (const [color, name] of [['#1d5849', 'Forest'], ['#18231f', 'Charcoal'], ['#
   const button = document.createElement('button');
   button.type = 'button'; button.className = 'swatch'; button.style.background = color;
   button.setAttribute('aria-label', name); button.dataset.color = color; button.innerHTML = '<span aria-hidden="true"></span>';
-  button.addEventListener('click', () => { ink = color; updateColors(); update(); });
+  button.addEventListener('click', () => { ink = color; design.color = color; $('design-color').value = color; updateColors(); update(); });
   $('colors').append(button);
 }
 function updateColors() {
@@ -103,19 +106,23 @@ function invalidate() {
 }
 async function update() {
   clearTimeout(timer); invalidate(); const current = revision;
+  if (design.logo) $('correction').value = 'H';
+  $('correction').disabled = Boolean(design.logo);
   try {
     const payload = buildPayload(selected, values[selected]);
-    const options = { errorCorrectionLevel: $('correction').value, margin: 4, width: Number($('size').value), color: { dark: ink, light: '#ffffff' } };
-    const canvas = document.createElement('canvas');
-    await QRCode.toCanvas(canvas, payload, options);
-    const svg = await QRCode.toString(payload, { ...options, type: 'svg' });
+    const { svg, width, height } = renderDesign(payload, design, $('correction').value);
+    const size = Number($('size').value);
+    const canvas = await rasterize(svg, size, Math.round(size * height / width));
     if (current !== revision) return;
     const preview = $('qr-canvas'); preview.width = canvas.width; preview.height = canvas.height;
     preview.getContext('2d').drawImage(canvas, 0, 0);
-    ready = { payload, svg, canvas, type: selected };
     preview.hidden = false; $('empty-preview').hidden = true;
+    const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+    const decoded = jsQR(pixels.data, canvas.width, canvas.height);
+    if (!decoded || decoded.data !== payload) throw new Error('Scan check failed. Try darker ink, a lighter background, simpler shapes, or remove the logo.');
+    ready = { payload, svg, canvas, type: selected };
     $('encoded').textContent = payload;
-    $('status').textContent = 'Ready to download · updates as you type';
+    $('status').textContent = 'Scan check passed · ready to download';
     $('download-png').disabled = $('download-svg').disabled = $('copy').disabled = false;
   } catch (error) {
     if (current !== revision) return;

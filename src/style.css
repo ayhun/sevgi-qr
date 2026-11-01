@@ -3,3 +3,21 @@
 @media(max-width:900px){.editor{padding:24px}.preview{padding:24px}.settings{grid-template-columns:1fr 1fr}.color-field{grid-column:1/-1}.intro-note{margin-right:4px;width:195px}.workspace{grid-template-columns:minmax(0,1.3fr) minmax(280px,1fr)}}
 @media(max-width:700px){.site-header{padding:17px 20px;gap:10px}.wordmark{font-size:11px}nav{font-size:10px}nav a{padding:9px}.current{display:none}main{padding:0 20px}.intro{padding:43px 0 32px}.intro-note{display:none}h1{font-size:44px}.eyebrow{font-size:9px}.lede{font-size:13px}.desktop{display:none}.workspace{grid-template-columns:1fr}.preview{border-left:0;border-top:1px solid var(--line);padding:26px}.qr-stage{max-width:340px;margin:auto}.editor{padding:22px}.settings{grid-template-columns:1fr 1fr}.fields{gap:16px 12px}.section-label span:last-child{font-size:9px}.notes{grid-template-columns:1fr;gap:25px;padding:34px 0}.notes article{display:grid;grid-template-columns:22px 1fr;gap:0 12px}.notes .note-number{padding-top:7px}.notes h3{margin:0 0 6px}.notes p{grid-column:2}.form-bottom{gap:14px}.hint{font-size:10px}footer{padding:22px 20px;font-size:9px}.preview-heading{max-width:340px;margin:0 auto 20px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+.design-tabs{display:flex;gap:8px;margin:24px 0 0;border-bottom:1px solid var(--line)}
+.design-tabs button{border:0;border-bottom:3px solid transparent;background:transparent;padding:13px 18px;color:var(--muted);font:inherit;cursor:pointer}
+.design-tabs button[aria-pressed=true]{border-color:var(--green);color:var(--green);font-weight:700}
+.design-panel{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:22px 0}
+.design-panel[hidden]{display:none}
+.design-panel label{display:flex;flex-direction:column;gap:9px;font-size:12px;min-width:0}
+.design-panel input,.design-panel select{width:100%;min-width:0}
+.design-panel input[type=color]{height:43px;padding:4px;cursor:pointer}
+.design-panel input[type=checkbox]{width:20px;height:20px;accent-color:var(--green)}
+.design-panel input[type=file]{font-size:11px;padding:8px}
+.design-panel .hint,.logo-choices{grid-column:1/-1}
+.design-panel label:has(input[type=file]){grid-column:1/-1}
+.logo-choices{display:flex;gap:8px;flex-wrap:wrap}
+.logo-choices button{width:53px;height:53px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--green);cursor:pointer}
+.logo-choices button[aria-pressed=true]{outline:2px solid var(--green);background:#e6eee7}
+.logo-choices svg{width:26px;height:26px}
+.qr-stage{aspect-ratio:auto;min-height:250px}.qr-stage canvas{image-rendering:auto}
+@media(min-width:701px){.preview{align-self:start;position:sticky;top:85px}}
