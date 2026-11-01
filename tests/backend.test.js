@@ -36,13 +36,13 @@ test('links belong to their Microsoft account; destination edits preserve the pr
   const created = await handlers.create(request('alice', { title: 'Poster', destination: 'https://example.org/one' }));
   assert.equal(created.status, 201);
   const { id, shortUrl } = created.jsonBody.link;
-  assert.match(shortUrl, /^\/r\/[A-Za-z0-9_-]{3}\/[A-Za-z0-9_-]{6}$/);
+  assert.match(shortUrl, /^\/api\/r\/[A-Za-z0-9_-]{3}\/[A-Za-z0-9_-]{6}$/);
   assert.equal((await handlers.list(request('bob'))).jsonBody.links.length, 0);
   assert.equal((await handlers.update(request('bob', { destination: 'https://evil.example' }), id)).status, 404);
   const updated = await handlers.update(request('alice', { destination: 'https://example.org/two' }), id);
   assert.equal(updated.jsonBody.link.shortUrl, shortUrl);
   assert.equal(updated.jsonBody.link.destination, 'https://example.org/two');
-  const [, , owner, slug] = shortUrl.split('/');
+  const [, , , owner, slug] = shortUrl.split('/');
   const first = await handlers.redirect(owner, slug);
   assert.equal(first.status, 302); assert.equal(first.headers.Location, 'https://example.org/two');
   assert.equal((await handlers.stats(request('bob'), id)).status, 404);
@@ -62,7 +62,7 @@ test('an owner-code collision lengthens only the new account alias', async () =>
   const handlers = createHandlers({ links, scans, random: () => 'Ab_123' });
   const created = await handlers.create(request('bob', { destination: 'https://example.org' }));
   assert.equal(created.status, 201);
-  assert.match(created.jsonBody.link.shortUrl, /^\/r\/[A-Za-z0-9_-]{4}\/Ab_123$/);
+  assert.match(created.jsonBody.link.shortUrl, /^\/api\/r\/[A-Za-z0-9_-]{4}\/Ab_123$/);
   assert.equal((await handlers.list(request('bob'))).jsonBody.links.length, 1);
   assert.equal((await handlers.list(request('another-account'))).jsonBody.links.length, 0);
 });

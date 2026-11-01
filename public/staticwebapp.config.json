@@ -6,7 +6,6 @@
     "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'none'"
   },
   "routes": [
-    { "route": "/r/*", "rewrite": "/r/index.html", "headers": { "Cache-Control": "no-store" } },
     { "route": "/api/links", "allowedRoles": ["authenticated"] },
     { "route": "/api/links/*", "allowedRoles": ["authenticated"] },
     { "route": "/dashboard", "rewrite": "/index.html", "allowedRoles": ["authenticated"], "headers": { "Cache-Control": "no-store" } },

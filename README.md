@@ -157,14 +157,17 @@ Sign-out uses `/.auth/logout`. University/work tenants may require admin consent
 
 Managed links use a separate Standard LRS Azure Storage account with two Tables.
 The API is a managed Azure Functions app inside the existing Free Static Web App.
-The public QR URL is `/r/{owner}/{id}`. A small static page forwards browser
-visits to the public `/api/r/{owner}/{id}` Function; this requires JavaScript
-and may not work in non-browser link previewers. New owner aliases start at
-three Base64URL characters; a collision extends only the newer account's alias.
+The public QR URL is `/api/r/{owner}/{id}`. It is handled directly by the
+managed Function and returns an HTTP redirect without browser JavaScript.
+Azure Static Web Apps fixes managed API routes under `/api`. New owner aliases
+start at three Base64URL characters; a collision extends only the newer
+account's alias.
 Link IDs use six random Base64URL characters and retry on collisions. Alias
 reservation lives in the existing `links` Table, not a third lookup table.
-Previously issued 16/12 and 24/20 links remain supported. These short public
-URLs are not secrets. `/api/links*` is protected at the edge and each API
+Previously issued `/api/r/` links with 16/12 and 24/20 IDs remain supported.
+Links issued with the JavaScript-based `/r/` path are not migrated by this
+reversion. These short public URLs are not secrets. `/api/links*` is protected
+at the edge and each API
 handler also checks the signed-in user ID. Delete removes the managed link and
 its daily scan records after a confirmation in the dashboard. Link records are
 partitioned by a hash of the Static Web Apps user ID. The application stores a daily scan

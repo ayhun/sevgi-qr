@@ -8,7 +8,7 @@ const shortSlug = value => /^[A-Za-z0-9_-]{6}$/.test(value || '');
 const legacyOwner = (owner, slug) => (/^[a-f0-9]{16}$/.test(owner || '') && /^[a-f0-9]{12}$/.test(slug || '')) || (/^[a-f0-9]{24}$/.test(owner || '') && /^[a-f0-9]{20}$/.test(slug || ''));
 const validPair = (owner, slug) => (/^[A-Za-z0-9_-]{3,43}$/.test(owner || '') && shortSlug(slug)) || legacyOwner(owner, slug);
 const ownerRow = '!owner';
-const strip = item => ({ id: item.rowKey, title: item.title, destination: item.destination, active: item.active, createdAt: item.createdAt, updatedAt: item.updatedAt, shortUrl: `/r/${item.partitionKey}/${item.rowKey}` });
+const strip = item => ({ id: item.rowKey, title: item.title, destination: item.destination, active: item.active, createdAt: item.createdAt, updatedAt: item.updatedAt, shortUrl: `/api/r/${item.partitionKey}/${item.rowKey}` });
 
 export function principalOf(request) {
   const encoded = request.headers.get('x-ms-client-principal');
