@@ -1,4 +1,4 @@
-name: Terraform
+name: Build and deploy
 
 on:
   pull_request:
@@ -20,6 +20,20 @@ env:
   TF_INPUT: "false"
 
 jobs:
+  frontend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm install --global pnpm@11.19.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm build
+
   validate:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -36,7 +50,7 @@ jobs:
       - run: terraform validate
 
   production:
-    needs: validate
+    needs: [validate, frontend]
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     environment: production
     runs-on: ubuntu-24.04
@@ -60,6 +74,16 @@ jobs:
         working-directory: infra
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Build frontend
+        working-directory: .
+        run: |
+          npm install --global pnpm@11.19.0
+          pnpm install --frozen-lockfile
+          pnpm build
       - name: Check environment configuration
         run: |
           test -n "$ARM_TENANT_ID" || { echo '::error::Set production variable AZURE_TENANT_ID'; exit 1; }
@@ -89,6 +113,25 @@ jobs:
       - name: Apply saved plan
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'apply')
         run: terraform apply -lock-timeout=5m production.tfplan
+      - name: Retrieve deployment token using Azure OIDC login
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'apply')
+        id: deployment-token
+        run: |
+          token=$(az staticwebapp secrets list --name sevgi-qr --resource-group sevgi-qr --query properties.apiKey -o tsv)
+          test -n "$token" || { echo '::error::Azure returned an empty deployment token'; exit 1; }
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+      - name: Deploy QR Studio
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'apply')
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.deployment-token.outputs.token }}
+          action: upload
+          app_location: dist
+          output_location: ''
+          skip_app_build: true
+          skip_api_build: true
+          production_branch: main
       - name: Show hosting endpoint and DNS target
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'apply')
         run: |
@@ -99,5 +142,5 @@ jobs:
             echo "Custom URL: $(terraform output -raw qr_url)"
             echo "DNS: keep the DNS-only CNAME named qr under sgkafali.com pointing to $(terraform output -raw qr_domain_cname_target)."
             echo ''
-            echo 'Azure manages the custom-domain HTTPS certificate. Application content deployment is a separate next step.'
+            echo 'QR Studio deployed. Azure manages the custom-domain HTTPS certificate.'
           } >> "$GITHUB_STEP_SUMMARY"

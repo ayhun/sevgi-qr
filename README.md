@@ -1,6 +1,42 @@
 # Sevgi QR
 
-QR generator project with Terraform CI/CD for the existing resource group `sevgi-qr`.
+QR Studio at https://qr.sgkafali.com: a browser-based QR generator, styled to
+match Sevgi's portfolio, with automated Azure deployment.
+
+## Application
+
+- Link, text, email, call, SMS, vCard, WhatsApp, and Wi-Fi codes.
+- Live preview, three high-contrast ink colors, error correction selection,
+  and PNG (512/1024/2048 px) or SVG downloads.
+- Content stays in memory in the current tab. No account, analytics, backend,
+  or browser storage. The deployed content security policy blocks network
+  connections from scripts. Google Fonts supplies the portfolio typography.
+- Static codes contain their content directly; there is no redirect service,
+  editing after download, scan tracking, or expiry imposed by this tool.
+- Wi-Fi uses personal-network credentials (WPA/WPA2/WPA3, WEP or open).
+  Enterprise/EAP networks are not supported. Scanner behavior varies by device;
+  test the downloaded code with your intended phone before printing.
+
+Use Node.js 24 and pnpm 11.19.0:
+
+```bash
+npm install --global pnpm@11.19.0
+pnpm install --frozen-lockfile
+pnpm dev
+pnpm test
+pnpm build
+```
+
+Tests generate PNGs for all eight payload types and independently decode them,
+including Unicode and escaped Wi-Fi/vCard fields. Browser verification also
+covers downloads, input clearing, and the mobile layout.
+
+Every push to `main` validates Terraform, tests and builds the frontend, applies
+the saved Terraform plan, and deploys `dist/` with Azure Static Web Apps. The
+workflow obtains and masks the deployment token through the existing Azure
+OIDC login; no additional GitHub secret is required. The identity needs
+`Microsoft.Web/staticSites/listSecrets/action`, included in its existing
+resource-group Owner/Contributor role. Manual plan-only runs do not deploy.
 
 ## Identity
 
@@ -57,19 +93,19 @@ grant narrower, container-scoped blob permissions:
    - `TF_STATE_STORAGE_ACCOUNT`
 
 3. Push to `main` to plan and automatically apply the saved plan. Manual
-   **Actions → Terraform → Run workflow** still supports `plan` and `apply`.
+   **Actions → Build and deploy → Run workflow** still supports `plan` and `apply`.
    Configure environment reviewers if desired.
 
 ## Workflow behavior
 
-- Pull requests: formatting and validation without Azure access or OIDC tokens.
+- Pull requests: formatting, Terraform validation, frontend tests and build.
 - Pushes to `main`: validation, production plan, then automatic apply of that
-  exact saved plan. Changes on `main` can therefore change Azure resources.
+  exact saved plan, then frontend deployment. Changes on `main` can therefore change Azure resources.
 - Manual runs on `main`: plan, or plan plus apply of the exact saved plan in the same job.
 - Production jobs are serialized; Azure Blob leases lock the state.
 - State and plans are neither committed nor uploaded as workflow artifacts.
 - CI uses Terraform 1.9.8 and the committed provider lockfile.
-- Both jobs use Ubuntu 24.04 explicitly, with Node.js 24-based checkout,
+- All jobs use Ubuntu 24.04 explicitly, with Node.js 24-based checkout,
   setup-terraform and Azure login actions. Runner OS upgrades are intentional,
   rather than following changes to `ubuntu-latest`.
 
@@ -88,16 +124,16 @@ configuration does not guarantee a zero Azure bill.
    adds `azurerm_static_web_app.qr` on the Free SKU and its custom-domain binding.
    With hosting already provisioned, only the custom-domain binding should be added.
 3. Push to `main`. The workflow plans and applies automatically. For a retry
-   without a new commit, run **Actions → Terraform → Run workflow → apply**.
+   without a new commit, run **Actions → Build and deploy → Run workflow → apply**.
 4. The successful run summary provides the Azure HTTPS URL and the CNAME target
    for `qr.sgkafali.com`. Add only a `qr` CNAME at the current DNS provider;
    leave the portfolio's apex and `www` records unchanged.
 
-Hosting creation does not deploy the QR application. Terraform also binds
+The workflow deploys the QR application after applying Terraform. Terraform binds
 `qr.sgkafali.com` with CNAME validation; the DNS-only Cloudflare CNAME was verified
 before enabling this resource. Keep that record in place for Azure validation
 and managed HTTPS. Until binding and certificate provisioning complete, use the
-generated Azure hostname. Frontend deployment remains a separate next step.
+generated Azure hostname.
 
 The domain binding is now in Terraform state. Its one-time import declaration
 has been removed. The workflow identity retains subscription Reader (or an

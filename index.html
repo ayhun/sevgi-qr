@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Create and download QR codes for links, contact details, messages and Wi-Fi. A free tool by Sevgi Gokce Kafali. Everything is generated in your browser.">
+  <meta name="theme-color" content="#1d5849">
+  <title>QR Studio — Sevgi Gokce Kafali</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#generator">Skip to generator</a>
+  <header class="site-header">
+    <a class="wordmark" href="https://sgkafali.com">SEVGI <span>GOKCE</span> KAFALI</a>
+    <nav aria-label="Main navigation"><a class="current" href="#generator" aria-current="page">QR Studio</a><a href="https://sgkafali.com">Back to portfolio <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow"><span class="dot"></span> A small tool for everyday sharing</p><h1 id="page-title">A little square.<br>A useful connection.</h1><p class="lede">Turn a link, a contact, or a few words into a QR code.<br class="desktop"> Ready for your next poster, presentation, or everyday use.</p></div>
+      <div class="intro-note"><span class="note-mark" aria-hidden="true">↗</span><p>Made in your browser.<br>Yours to keep.</p><span>No account. No expiry.</span></div>
+    </section>
+    <section id="generator" class="workspace" aria-label="QR code generator">
+      <div class="editor">
+        <div class="section-label"><span>01 / CONTENT</span><span>Choose what to share</span></div>
+        <div id="types" class="types" role="group" aria-label="QR code type"></div>
+        <form id="qr-form" novalidate autocomplete="off">
+          <div class="form-heading"><h2 id="form-title">Website link</h2><p id="form-description"></p></div>
+          <div id="fields" class="fields"></div>
+          <div class="form-bottom"><p id="type-note" class="hint"></p><button type="button" id="clear" class="text-button">Clear fields <span aria-hidden="true">↺</span></button></div>
+          <button type="submit" class="sr-only">Update QR code</button>
+        </form>
+        <div class="appearance">
+          <div class="section-label"><span>02 / APPEARANCE</span><span>Make it yours</span></div>
+          <div class="settings">
+            <fieldset class="color-field"><legend>Ink color</legend><div class="swatches" id="colors"></div></fieldset>
+            <label>PNG size<select id="size"><option value="512">512 × 512 px</option><option value="1024" selected>1024 × 1024 px</option><option value="2048">2048 × 2048 px</option></select></label>
+            <label>Error correction<select id="correction"><option value="M" selected>Standard (M)</option><option value="Q">Higher (Q)</option><option value="H">Highest (H)</option></select></label>
+          </div>
+          <p class="hint">A white border keeps the code easy to scan. SVG stays sharp at any size.</p>
+        </div>
+      </div>
+      <aside class="preview" aria-labelledby="preview-title">
+        <div class="preview-heading"><h2 id="preview-title">Your QR code</h2><span class="preview-tag" id="preview-type">LINK</span></div>
+        <div class="qr-stage"><canvas id="qr-canvas" aria-label="QR code for the entered content" role="img"></canvas><div id="empty-preview" hidden><span aria-hidden="true">＋</span><p>Add your details<br>to create a QR code.</p></div></div>
+        <p id="status" role="status" aria-live="polite" class="status"></p>
+        <div class="downloads"><button id="download-png" class="primary" type="button" disabled>Download PNG <span aria-hidden="true">↓</span></button><button id="download-svg" class="secondary" type="button" disabled>Download SVG <span aria-hidden="true">↓</span></button></div>
+        <p class="preview-footnote">Scan to check before printing or sharing.</p>
+        <details id="encoded-details"><summary>View encoded content</summary><pre id="encoded"></pre><button id="copy" class="text-button" type="button" disabled>Copy content</button></details>
+      </aside>
+    </section>
+    <section class="notes" aria-label="About this tool"><article><span class="note-number">01</span><h3>Private by design.</h3><p>Your entries stay in this browser tab. They aren’t uploaded or saved by this tool.</p></article><article><span class="note-number">02</span><h3>Made to last.</h3><p>These are static QR codes with no expiry. To change their content, generate a new code. Linked pages still need to stay online.</p></article><article><span class="note-number">03</span><h3>Ready for print.</h3><p>Use SVG for posters and publications, or PNG for slides and screens. Keep the white border and test at your final print size.</p></article></section>
+  </main>
+  <footer><span>© <span id="year"></span> Sevgi Gokce Kafali</span><a href="https://sgkafali.com">Part of sgkafali.com <span aria-hidden="true">↗</span></a></footer>
+  <noscript><p class="noscript">This tool needs JavaScript to generate QR codes in your browser.</p></noscript>
+</body>
+</html>

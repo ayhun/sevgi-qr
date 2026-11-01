@@ -13,6 +13,11 @@ resource "azurerm_static_web_app" "qr" {
     environment = "production"
     managed_by  = "terraform"
   }
+
+  # The content deployment action records these fields in Azure.
+  lifecycle {
+    ignore_changes = [repository_branch, repository_url]
+  }
 }
 
 # DNS remains managed in Cloudflare. Its DNS-only CNAME has been verified.
