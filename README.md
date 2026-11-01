@@ -99,14 +99,10 @@ before enabling this resource. Keep that record in place for Azure validation
 and managed HTTPS. Until binding and certificate provisioning complete, use the
 generated Azure hostname. Frontend deployment remains a separate next step.
 
-The first domain apply created the Azure binding but failed while polling a
-subscription-scoped operation status, before writing the binding to Terraform
-state. `infra/hosting.tf` includes a declarative import for that exact existing
-domain. The next plan should show **import**, not create or replace; the push
-workflow applies that plan to bring state back in sync. The workflow identity needs subscription
-Reader (or an equivalent custom role for
-`Microsoft.Web/locations/staticSitesOperationStatuses/read`) to poll domain
-operations.
+The domain binding is now in Terraform state. Its one-time import declaration
+has been removed. The workflow identity retains subscription Reader (or an
+equivalent custom role for `Microsoft.Web/locations/staticSitesOperationStatuses/read`)
+so future domain operations can be polled.
 
 The provider stores the sensitive deployment API key in Terraform state. It is
 not exposed through Terraform outputs or the workflow summary. Keep state

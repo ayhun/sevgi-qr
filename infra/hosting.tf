@@ -22,14 +22,6 @@ resource "azurerm_static_web_app_custom_domain" "qr" {
   validation_type   = "cname-delegation"
 }
 
-# Azure created this domain during the first apply, but Terraform could not
-# record it because polling required a subscription-scoped read permission.
-# The import is idempotent once the remote state contains this address.
-import {
-  to = azurerm_static_web_app_custom_domain.qr
-  id = "/subscriptions/f90ff751-313f-4e7a-a475-8d252d80c41a/resourceGroups/sevgi-qr/providers/Microsoft.Web/staticSites/sevgi-qr/customDomains/qr.sgkafali.com"
-}
-
 output "qr_url" {
   description = "Custom HTTPS endpoint; Azure manages the certificate."
   value       = "https://${azurerm_static_web_app_custom_domain.qr.domain_name}"
