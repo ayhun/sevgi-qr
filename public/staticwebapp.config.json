@@ -6,6 +6,8 @@
     "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'none'"
   },
   "routes": [
+    { "route": "/api/links", "allowedRoles": ["authenticated"] },
+    { "route": "/api/links/*", "allowedRoles": ["authenticated"] },
     { "route": "/dashboard", "rewrite": "/index.html", "allowedRoles": ["authenticated"], "headers": { "Cache-Control": "no-store" } },
     { "route": "/.auth/login/github", "statusCode": 404 },
     { "route": "/assets/*", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
@@ -14,5 +16,6 @@
   ],
   "responseOverrides": {
     "401": { "statusCode": 302, "redirect": "/.auth/login/aad?post_login_redirect_uri=/dashboard" }
-  }
+  },
+  "platform": { "apiRuntime": "node:22" }
 }

@@ -6,13 +6,13 @@ match Sevgi's portfolio, with automated Azure deployment.
 ## Application
 
 - Link, text, email, call, SMS, vCard, WhatsApp, and Wi-Fi codes.
-- Live preview, three high-contrast ink colors, error correction selection,
+- Live preview, twelve high-contrast ink colors, error correction selection,
   and PNG (512/1024/2048 px) or SVG downloads.
-- Content stays in memory in the current tab. No account, analytics, backend,
-  or browser storage. The deployed content security policy blocks network
-  connections from scripts. Google Fonts supplies the portfolio typography.
-- Static codes contain their content directly; there is no redirect service,
-  editing after download, scan tracking, or expiry imposed by this tool.
+- Anonymous generation stays in the browser tab. It does not save the entered
+  content or track scans. Google Fonts supplies the portfolio typography.
+- Signed-in users can save managed links, update destinations, pause links,
+  and see daily scan counts. Managed QR codes encode this site's stable redirect
+  URL. Static codes contain their content directly and cannot be edited later.
 - Wi-Fi uses personal-network credentials (WPA/WPA2/WPA3, WEP or open).
   Enterprise/EAP networks are not supported. Scanner behavior varies by device;
   test the downloaded code with your intended phone before printing.
@@ -32,7 +32,7 @@ including Unicode and escaped Wi-Fi/vCard fields. Browser verification also
 covers downloads, input clearing, and the mobile layout.
 
 Every push to `main` validates Terraform, tests and builds the frontend, applies
-the saved Terraform plan, and deploys `dist/` with Azure Static Web Apps. The
+the saved Terraform plan, and deploys `dist/` and `api/` with Azure Static Web Apps. The
 workflow obtains and masks the deployment token through the existing Azure
 OIDC login; no additional GitHub secret is required. The identity needs
 `Microsoft.Web/staticSites/listSecrets/action`, included in its existing
@@ -146,9 +146,7 @@ storage access restricted.
 
 Provider auto-registration is disabled because the identity is resource-group-scoped. An administrator must register additional service namespaces when needed. Contributor cannot create runtime IAM role assignments; those require separate authorization.
 
-## Local validation
-
-### Optional Microsoft sign-in
+## Managed links and Microsoft sign-in
 
 The generator remains public and browser-only. Azure Static Web Apps' built-in
 Microsoft Entra provider handles `/.auth/login/aad` without an app secret in this
@@ -157,13 +155,27 @@ the Azure edge. The account page reads `/.auth/me` only when opened, uses no-sto
 requests, and displays returned identity text without HTML interpolation.
 Sign-out uses `/.auth/logout`. University/work tenants may require admin consent.
 
-This release provides an account landing page, not link storage. Editable
-destinations and analytics are explicitly marked as upcoming. No redirect API,
-database, or scan tracking has been deployed. Static QR contents cannot be
-changed retroactively. The backend is a separate phase requiring a cost and
-privacy review. Auth routes require the deployed Azure host; Vite alone cannot
-complete sign-in. Verify Microsoft login and logout with a real test account
-after deployment; do not treat unit tests as an end-to-end auth test.
+Managed links use a separate Standard LRS Azure Storage account with two Tables.
+The API is a managed Azure Functions app inside the existing Free Static Web App.
+Only `/api/r/{owner}/{id}` is public; `/api/links*` is protected at the edge and
+each API handler also checks the signed-in user ID. Link records are partitioned
+by a hash of the Static Web Apps user ID. The application stores a daily scan
+count, not individual visitor records or IP addresses. Counts can include bots
+and repeat scans. Counting stops at 10,000 per link per UTC day, while redirects
+continue. The dashboard limits accounts to 100 managed links. These are usage
+guardrails, not a hard spending cap.
+
+Terraform creates a €5 monthly budget on the `sevgi-qr` resource group, with
+50% and 100% alerts to `ayhuntekat@gmail.com` and `sevgikafalii@gmail.com`.
+Budget evaluations are periodic and do not stop resources. The application
+storage connection string is an encrypted Static Web Apps app setting and is
+also present in Terraform state; restrict state-blob access accordingly.
+Managed Functions on the Free plan cannot use managed identity, so the storage
+account uses a key-based connection string. Auth routes require the deployed
+Azure host; Vite alone cannot complete sign-in. Verify Microsoft login and
+logout with a real test account after deployment.
+
+## Local validation
 
 ```bash
 terraform -chdir=infra fmt -check -recursive

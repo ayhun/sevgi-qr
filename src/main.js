@@ -38,7 +38,7 @@ let timer;
 let ready = null;
 const design = designControls($('design-controls'), () => { ink = design.color; updateColors(); update(); }, icons);
 const values = Object.fromEntries(Object.keys(types).map(key => [key, {}]));
-values.link.url = 'https://sgkafali.com';
+values.link.url = new URLSearchParams(location.search).get('managed') || 'https://sgkafali.com';
 values.wifi.security = 'WPA';
 
 for (const [key, type] of Object.entries(types)) {

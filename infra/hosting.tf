@@ -7,6 +7,9 @@ resource "azurerm_static_web_app" "qr" {
   location = "westeurope"
   sku_tier = "Free"
   sku_size = "Free"
+  app_settings = {
+    TABLES_CONNECTION_STRING = azurerm_storage_account.links.primary_connection_string
+  }
 
   tags = {
     project     = "sevgi-qr"

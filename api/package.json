@@ -1,0 +1,12 @@
+{
+  "name": "sevgi-qr-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/functions.js",
+  "engines": { "node": ">=22 <23" },
+  "dependencies": {
+    "@azure/functions": "4.17.0",
+    "@azure/data-tables": "13.3.2"
+  }
+}
