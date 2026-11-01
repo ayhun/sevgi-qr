@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Create and download QR codes for links, contact details, messages and Wi-Fi. A free tool by Sevgi Gokce Kafali. Everything is generated in your browser.">
+  <meta name="description" content="A free QR code generator and optional editable-link dashboard by scientist Sevgi Gokce Kafali. No ads, paywall, or account required to make a QR code.">
   <meta name="theme-color" content="#1d5849">
   <title>QR Studio — Sevgi Gokce Kafali</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -12,18 +12,19 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script type="module" src="/src/main.js"></script>
 </head>
-<body>
+<body data-auth="pending">
   <a class="skip-link" href="#generator">Skip to generator</a>
   <header class="site-header">
     <a class="wordmark" href="/">QR STUDIO <span>by Sevgi</span></a>
-    <nav aria-label="Main navigation"><a href="/#generator">Create a QR code</a><a href="/#about-tool">Why it’s free</a><a class="account-link" href="/#account">My links / Sign in</a></nav>
+    <nav aria-label="Main navigation"><a href="/#generator">Make a code</a><a href="/#about-tool">Why I built it</a><a class="account-link" href="/dashboard">My links</a></nav>
   </header>
   <main>
     <section class="intro" aria-labelledby="page-title">
-      <div><p class="eyebrow"><span class="dot"></span> Free QR codes. No ads. No paywall.</p><h1 id="page-title">Make a QR code.<br>Get on with your work.</h1><p class="lede">For your poster, paper, slides, or anything else you want to share.<br class="desktop"> All QR types, designs, logos, and downloads are free. No sign-in required.</p></div>
-      <div class="tool-note"><strong>No account needed</strong><p>Create → customize → download.</p><span>Your code is generated in this browser, not on a server.</span></div>
+      <div><p class="eyebrow"><span class="dot"></span> A useful little tool, made by a scientist</p><h1 id="page-title">QR codes without<br>the runaround.</h1><p class="lede">I built this after making too many research posters with QR tools full of ads, sign-ups, and paywalls. Make and download a code here for free, then get back to your work.</p><a class="intro-link" href="#generator">Make a QR code <span aria-hidden="true">↘</span></a></div>
+      <div class="tool-note"><span class="tool-note-label">A NOTE FROM SEVGI</span><p>Posters have enough moving parts already.</p><span>No account needed for the generator. Your code is made in this browser.</span></div>
     </section>
     <section id="generator" class="workspace" aria-label="QR code generator">
+      <div id="managed-context" class="managed-context" hidden><div><span class="eyebrow">FROM YOUR MANAGED LINKS</span><strong>Designing a code for an editable link.</strong><p>The QR code will point to your saved short link. You can change its destination later without reprinting.</p></div><a href="/dashboard">Back to my links <span aria-hidden="true">↗</span></a></div>
       <div class="editor">
         <div class="section-label"><span>01 / CONTENT</span><span>Choose what to share</span></div>
         <div id="types" class="types" role="group" aria-label="QR code type"></div>
@@ -54,11 +55,22 @@
       </aside>
     </section>
     <section id="account" class="account-section" aria-labelledby="account-title">
-      <div><p class="eyebrow">OPTIONAL ACCOUNT</p><h2 id="account-title">Your links, in one place.</h2><p>You never need an account to create or download a QR code. Sign in with Microsoft to save links, update destinations, and see daily scan counts.</p><a class="sign-in" href="/.auth/login/aad?post_login_redirect_uri=/dashboard">Sign in with Microsoft <span aria-hidden="true">↗</span></a><p class="hint">Microsoft handles sign-in. QR Studio does not receive your password. Some work or university accounts may require administrator approval.</p></div>
-      <div class="planned-features"><span class="feature-status">FREE WITH AN ACCOUNT</span><h3>Useful features, without a paywall.</h3><ul><li>Save and organize up to 100 managed links.</li><li>Change a destination without reprinting its QR code.</li><li>See daily scan counts for each managed link.</li></ul><p>Managed links pass through this site so their destinations can change. Counts include repeated scans and may include automated scanners; visitor IP addresses are not stored by QR Studio. Codes from the public generator remain static and are not tracked.</p></div>
+      <div class="account-copy guest-only"><p class="eyebrow">ONLY IF YOU NEED IT</p><h2 id="account-title">Want to change a link after printing?</h2><p>The generator above works without an account. If you want a QR link you can update later, sign in to save it and see daily scan counts.</p><a class="sign-in" href="/.auth/login/aad?post_login_redirect_uri=/dashboard">Sign in with Microsoft <span aria-hidden="true">↗</span></a><p class="hint">No password is shared with QR Studio. Some work or university accounts may require administrator approval.</p></div>
+      <div class="account-copy member-only"><p class="eyebrow">YOUR WORKSPACE</p><h2 id="member-title">Your links are ready when you are.</h2><p id="member-status">You are signed in. Save an editable link, update its destination, or check its daily counts.</p><a class="sign-in" href="/dashboard">Open my links <span aria-hidden="true">↗</span></a><a class="account-sign-out text-button" href="/.auth/logout?post_logout_redirect_uri=/">Sign out</a></div>
+      <div class="account-copy unavailable-only"><p class="eyebrow">OPTIONAL ACCOUNT</p><h2 id="unavailable-title">Keep working without signing in.</h2><p>We could not check your sign-in just now. The QR generator still works; you can try opening your saved links when the connection is back.</p><a class="sign-in" href="/dashboard">Open my links <span aria-hidden="true">↗</span></a></div>
+      <div class="planned-features"><span class="feature-status">TWO WAYS TO USE THIS TOOL</span><h3>A code, or a link you can manage.</h3><div class="feature-row"><strong>Just a QR code</strong><p>Enter content, adjust the design, and download it. Free, local to your browser, and no login.</p></div><div class="feature-row"><strong>An editable link</strong><p>Save a short link, design its QR code, and change the destination later. Daily scan counts and full-history CSV are free too.</p></div><p class="hint">Managed links pass through this site for redirects and counts. Static codes from the generator are not tracked.</p></div>
     </section>
-    <section id="dashboard" class="dashboard" hidden aria-labelledby="dashboard-title"><p class="eyebrow">YOUR ACCOUNT</p><h1 id="dashboard-title">My links</h1><p id="account-status" role="status">Checking your Microsoft sign-in…</p><div id="dashboard-content" hidden><p>Make a managed link, then design its QR code. You can edit the destination later without changing the printed code.</p><form id="managed-form" class="managed-form"><label>Link name (optional)<input id="managed-title" name="title" maxlength="100" placeholder="Conference poster"></label><label>Destination URL<input id="managed-destination" name="destination" type="url" maxlength="2048" placeholder="https://example.org/paper" required></label><button class="sign-in" type="submit">Create managed link</button></form><p id="managed-status" role="status"></p><div id="managed-list" class="managed-list" aria-live="polite"></div><p class="hint">Daily counts include repeat scans and automated previews. QR Studio stores no visitor IP addresses. Tracking stops after 10,000 scans per link per day; redirects still work. Managed links are public URLs, not secret access tokens.</p></div><a class="text-button" href="/.auth/logout?post_logout_redirect_uri=/">Sign out</a></section>
-    <section id="about-tool" class="story" aria-labelledby="story-title"><p class="eyebrow">WHY THIS EXISTS</p><h2 id="story-title">Built after one too many QR-code paywalls.</h2><p>I needed QR codes for my research posters, but finding a straightforward tool meant getting past ads, sign-up forms, and paid features. So I decided to build my own—and share it.</p><p>QR Studio is a practical tool, not a subscription funnel. Generation and downloads are free, with no login required. Optional accounts make editable links and daily scan counts free too.</p><a href="https://sgkafali.com">— Sevgi Gokce Kafali ↗</a></section>
+    <section id="dashboard" class="dashboard" hidden aria-labelledby="dashboard-title">
+      <div class="dashboard-heading"><div><p class="eyebrow">YOUR SAVED LINKS</p><h1 id="dashboard-title">My links</h1><p class="dashboard-lede">Create an editable short link first. Then design its QR code for your poster, slides, or handout.</p></div><a class="dashboard-create-link" href="/#generator">Make a one-off QR code <span aria-hidden="true">↗</span></a></div>
+      <p id="account-status" role="status">Checking your Microsoft sign-in…</p>
+      <div id="dashboard-content" hidden>
+        <div class="managed-form-heading"><h2>New editable link</h2><p>You can change the destination later without changing a printed QR code.</p></div>
+        <form id="managed-form" class="managed-form"><label>Link name (optional)<input id="managed-title" name="title" maxlength="100" placeholder="Conference poster"></label><label>Destination URL<input id="managed-destination" name="destination" type="url" maxlength="2048" placeholder="https://example.org/paper" required></label><button class="sign-in" type="submit">Save link</button></form>
+        <p id="managed-status" role="status"></p><div id="managed-list" class="managed-list" aria-live="polite"></div>
+        <p class="hint">Daily counts include repeat scans and automated previews. QR Studio stores no visitor IP addresses. Tracking stops after 10,000 scans per link per day; redirects still work. Managed links are public URLs, not secret access tokens.</p>
+      </div><a class="text-button dashboard-sign-out" href="/.auth/logout?post_logout_redirect_uri=/">Sign out</a>
+    </section>
+    <section id="about-tool" class="story" aria-labelledby="story-title"><p class="eyebrow">WHY I MADE THIS</p><h2 id="story-title">The QR code was supposed to be the easy part.</h2><p>I’m Sevgi Gokce Kafali, a researcher. When I needed QR codes for posters, I kept running into ads, account walls, and charges for simple things. So I made the tool I wanted to use myself.</p><p>You can generate and download QR codes here without signing in. If you need an editable link for something already printed, the optional account gives you a place to manage it and see daily counts—also free. It is a small, practical project, not a subscription service.</p><a href="https://sgkafali.com">More about my research ↗</a></section>
   </main>
   <footer><span>© <span id="year"></span> Sevgi Gokce Kafali</span><a href="https://sgkafali.com">Part of sgkafali.com <span aria-hidden="true">↗</span></a></footer>
   <noscript><p class="noscript">This tool needs JavaScript to generate QR codes in your browser.</p></noscript>

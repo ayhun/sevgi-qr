@@ -1,18 +1,48 @@
 import { last90Days } from './daily-counts.js';
+import { accountNavigationOf, sessionKindOf } from './session.js';
 
-// Azure Static Web Apps supplies identity and protects dashboard/API routes.
-if (location.pathname.replace(/\/$/, '') === '/dashboard') {
+// One session check keeps the generator and dashboard in the same account state.
+const isDashboard = location.pathname.replace(/\/$/, '') === '/dashboard';
+const accountLink = document.querySelector('.account-link');
+if (isDashboard) {
   document.body.classList.add('dashboard-view');
   const dashboard = document.getElementById('dashboard');
   dashboard.hidden = false;
   document.title = 'My links — QR Studio';
+  accountLink.setAttribute('aria-current', 'page');
+}
+const sessionPromise = (async () => {
+  try {
+    const response = await fetch('/.auth/me', { cache: 'no-store', credentials: 'same-origin' });
+    if (!response.ok) throw new Error('Authentication unavailable');
+    const { clientPrincipal } = await response.json();
+    const kind = sessionKindOf(clientPrincipal);
+    document.body.dataset.auth = kind;
+    const navigation = accountNavigationOf(kind);
+    accountLink.textContent = navigation.label;
+    accountLink.href = navigation.href;
+    if (kind === 'signed-in' && !isDashboard) {
+      document.getElementById('account').setAttribute('aria-labelledby', 'member-title');
+      if (clientPrincipal.userDetails) document.getElementById('member-status').textContent = `Signed in as ${clientPrincipal.userDetails}. Your managed links and daily counts are ready.`;
+    }
+    return { kind, principal: clientPrincipal };
+  } catch {
+    document.body.dataset.auth = 'unavailable';
+    const navigation = accountNavigationOf('unavailable');
+    accountLink.textContent = navigation.label;
+    accountLink.href = navigation.href;
+    if (!isDashboard) document.getElementById('account').setAttribute('aria-labelledby', 'unavailable-title');
+    return { kind: 'unavailable' };
+  }
+})();
+
+// Azure Static Web Apps protects /dashboard at the edge. The client check is
+// for honest UI state and errors, not a replacement for server-side auth.
+if (isDashboard) {
   const status = document.getElementById('account-status');
   const message = document.getElementById('managed-status');
   const content = document.getElementById('dashboard-content');
   const list = document.getElementById('managed-list');
-  const accountLink = document.querySelector('.account-link');
-  accountLink.href = '/dashboard'; accountLink.textContent = 'My links';
-  accountLink.setAttribute('aria-current', 'page');
 
   const element = (tag, className, content) => {
     const node = document.createElement(tag);
@@ -148,7 +178,7 @@ if (location.pathname.replace(/\/$/, '') === '/dashboard') {
   async function loadLinks() {
     const data = await api('/api/links');
     list.replaceChildren();
-    if (!data.links.length) list.append(element('p', 'dashboard-empty', 'No managed links yet. Create your first one above.'));
+    if (!data.links.length) list.append(element('p', 'dashboard-empty', 'Nothing saved yet. Add a destination above to create an editable link for your next poster or handout.'));
     else for (const link of data.links) list.append(renderLink(link));
   }
   document.getElementById('managed-form').addEventListener('submit', async event => {
@@ -160,17 +190,18 @@ if (location.pathname.replace(/\/$/, '') === '/dashboard') {
     } catch (error) { setMessage(error.message, true); }
     finally { button.disabled = false; }
   });
-  fetch('/.auth/me', { cache: 'no-store', credentials: 'same-origin' })
-    .then(response => { if (!response.ok) throw new Error('Authentication unavailable'); return response.json(); })
-    .then(async ({ clientPrincipal }) => {
-      if (!clientPrincipal?.userRoles?.includes('authenticated')) {
-        status.textContent = 'You are not signed in.';
-        const link = element('a', 'sign-in', 'Sign in with Microsoft'); link.href = '/.auth/login/aad?post_login_redirect_uri=/dashboard'; status.after(link);
-        return;
-      }
-      status.textContent = `Signed in${clientPrincipal.userDetails ? ` as ${clientPrincipal.userDetails}` : ' with Microsoft'}.`;
-      content.hidden = false;
-      try { await loadLinks(); } catch (error) { setMessage(error.message, true); }
-    })
-    .catch(() => { status.textContent = 'We could not check your sign-in. Please reload. QR creation is still available without an account.'; });
+  sessionPromise.then(async ({ kind, principal }) => {
+    if (kind === 'unavailable') {
+      status.textContent = 'We could not check your sign-in. Please reload to try again. The QR generator is still available.';
+      return;
+    }
+    if (kind !== 'signed-in') {
+      status.textContent = 'You are not signed in.';
+      const link = element('a', 'sign-in', 'Sign in with Microsoft'); link.href = '/.auth/login/aad?post_login_redirect_uri=/dashboard'; status.after(link);
+      return;
+    }
+    status.textContent = `Signed in${principal.userDetails ? ` as ${principal.userDetails}` : ' with Microsoft'}.`;
+    content.hidden = false;
+    try { await loadLinks(); } catch (error) { setMessage(error.message, true); }
+  });
 }

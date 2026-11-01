@@ -2,6 +2,7 @@ import jsQR from 'jsqr';
 import { renderDesign, rasterize } from './design.js';
 import { designControls } from './design-controls.js';
 import { buildPayload } from './payload.js';
+import { managedUrlOf } from './managed-link.js';
 import './style.css';
 import './account.js';
 
@@ -38,8 +39,12 @@ let timer;
 let ready = null;
 const design = designControls($('design-controls'), () => { ink = design.color; updateColors(); update(); }, icons);
 const values = Object.fromEntries(Object.keys(types).map(key => [key, {}]));
-values.link.url = new URLSearchParams(location.search).get('managed') || 'https://sgkafali.com';
+const managedUrl = managedUrlOf(new URLSearchParams(location.search).get('managed'), location.origin);
+values.link.url = managedUrl || 'https://sgkafali.com';
 values.wifi.security = 'WPA';
+function updateManagedContext() {
+  $('managed-context').hidden = !managedUrl || selected !== 'link' || values.link.url !== managedUrl;
+}
 
 for (const [key, type] of Object.entries(types)) {
   const button = document.createElement('button');
@@ -60,6 +65,7 @@ function updateColors() {
 }
 function renderFields() {
   const type = types[selected];
+  updateManagedContext();
   $('form-title').textContent = type.title; $('form-description').textContent = type.description;
   $('type-note').textContent = type.note; $('preview-type').textContent = type.name.toUpperCase();
   if (selected === 'wifi' && values.wifi.security === 'nopass') $('type-note').textContent = 'This is an open network. No password is included in the code.';
@@ -93,6 +99,7 @@ function renderFields() {
     }
     input.addEventListener('input', () => {
       values[selected][definition.name] = definition.type === 'checkbox' ? input.checked : input.value;
+      updateManagedContext();
       if (selected === 'wifi' && definition.name === 'security') { renderFields(); $('field-security').focus(); }
       invalidate(); clearTimeout(timer); timer = setTimeout(update, 180);
     });

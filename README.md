@@ -151,8 +151,10 @@ Provider auto-registration is disabled because the identity is resource-group-sc
 The generator remains public and browser-only. Azure Static Web Apps' built-in
 Microsoft Entra provider handles `/.auth/login/aad` without an app secret in this
 repository. `/dashboard` and `/dashboard/` require the `authenticated` role at
-the Azure edge. The account page reads `/.auth/me` only when opened, uses no-store
-requests, and displays returned identity text without HTML interpolation.
+the Azure edge. The generator and dashboard each read `/.auth/me` with a no-store
+request so navigation and account prompts reflect the current session. This is
+presentation state; edge rules and API handlers still enforce access. Returned
+identity text is displayed without HTML interpolation.
 Sign-out uses `/.auth/logout`. University/work tenants may require admin consent.
 
 Managed links use a separate Standard LRS Azure Storage account with two Tables.
