@@ -74,6 +74,35 @@ test('link-code collisions are retried within an owner partition', async () => {
   assert.equal(first.status, 201); assert.equal(second.status, 201);
   assert.notEqual(first.jsonBody.link.shortUrl, second.jsonBody.link.shortUrl);
 });
+test('daily count CSV is owner-only and exports full history', async () => {
+  const links = new Table(), scans = new Table();
+  const handlers = createHandlers({ links, scans, random: () => 'ABC123' });
+  const created = await handlers.create(request('alice', { destination: 'https://example.org' }));
+  const { id, shortUrl } = created.jsonBody.link;
+  const [, , , owner, slug] = shortUrl.split('/');
+  assert.equal((await handlers.statsCsv(unauthorized(), id)).status, 401);
+  assert.equal((await handlers.statsCsv(request('bob'), id)).status, 404);
+  assert.equal((await handlers.statsCsv(request('alice'), 'missing')).status, 404);
+
+  const empty = await handlers.statsCsv(request('alice'), id);
+  assert.equal(empty.body, 'date_utc,scans\r\n');
+  for (let n = 0; n < 91; n++) {
+    const date = new Date(Date.UTC(2026, 0, n + 1)).toISOString().slice(0, 10);
+    await scans.createEntity({ partitionKey: `${owner}:${slug}`, rowKey: date, count: n + 1 });
+  }
+  await scans.createEntity({ partitionKey: `${owner}:${slug}`, rowKey: 'invalid,date', count: 5 });
+  const csv = await handlers.statsCsv(request('alice'), id);
+  assert.equal(csv.status, 200);
+  assert.equal(csv.headers['Content-Type'], 'text/csv; charset=utf-8');
+  assert.equal(csv.headers['Content-Disposition'], `attachment; filename="qr-scans-${slug}.csv"`);
+  assert.equal(csv.headers['Cache-Control'], 'no-store');
+  const rows = csv.body.trimEnd().split('\r\n');
+  assert.equal(rows.length, 92);
+  assert.equal(rows[0], 'date_utc,scans');
+  assert.equal(rows[1], '2026-04-01,91');
+  assert.equal(rows.at(-1), '2026-01-01,1');
+  assert.equal((await handlers.stats(request('alice'), id)).jsonBody.days.length, 90);
+});
 test('previously issued managed links remain visible and editable', async () => {
   const links = new Table(), scans = new Table();
   const hash = createHash('sha256').update('alice').digest('hex');

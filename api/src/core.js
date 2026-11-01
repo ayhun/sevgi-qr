@@ -124,15 +124,36 @@ export function createHandlers({ links, scans, now = () => new Date(), random = 
     }
     return response(409, { error: 'This link changed while you were editing. Please reload.' });
   }
-  async function stats(request, slug) {
+  async function readStats(request, slug) {
     const principal = principalOf(request); if (!principal) return response(401, { error: 'Sign in with Microsoft.' });
     const owner = await ownerForSlug(principal.userId, slug);
     if (!owner) return response(404, { error: 'Link not found.' });
     try { await links.getEntity(owner, slug); } catch (error) { if (missing(error)) return response(404, { error: 'Link not found.' }); throw error; }
     const days = [];
-    for await (const entity of scans.listEntities({ queryOptions: { filter: `PartitionKey eq '${owner}:${slug}'` } })) days.push({ date: entity.rowKey, scans: entity.count });
+    for await (const entity of scans.listEntities({ queryOptions: { filter: `PartitionKey eq '${owner}:${slug}'` } })) {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(entity.rowKey) && Number.isSafeInteger(entity.count) && entity.count >= 0) days.push({ date: entity.rowKey, scans: entity.count });
+    }
     days.sort((a, b) => b.date.localeCompare(a.date));
-    return response(200, { days: days.slice(0, 90), note: 'Counts include repeat scans and may include automated scanners. No visitor IP addresses are stored.' });
+    return days;
+  }
+  async function stats(request, slug) {
+    const result = await readStats(request, slug);
+    if (!Array.isArray(result)) return result;
+    return response(200, { days: result.slice(0, 90), note: 'Counts include repeat scans and may include automated scanners. No visitor IP addresses are stored.' });
+  }
+  async function statsCsv(request, slug) {
+    const result = await readStats(request, slug);
+    if (!Array.isArray(result)) return result;
+    return {
+      status: 200,
+      body: `date_utc,scans\r\n${result.map(day => `${day.date},${day.scans}\r\n`).join('')}`,
+      headers: {
+        'Cache-Control': 'no-store',
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="qr-scans-${slug}.csv"`,
+        'X-Content-Type-Options': 'nosniff'
+      }
+    };
   }
   async function remove(request, slug) {
     const principal = principalOf(request); if (!principal) return response(401, { error: 'Sign in with Microsoft.' });
@@ -180,5 +201,5 @@ export function createHandlers({ links, scans, now = () => new Date(), random = 
     }
     return { status: 302, headers: { Location: item.destination, 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' } };
   }
-  return { list, create, update, stats, remove, redirect };
+  return { list, create, update, stats, statsCsv, remove, redirect };
 }

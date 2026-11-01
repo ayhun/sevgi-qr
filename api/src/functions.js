@@ -25,6 +25,9 @@ app.http('linkMutation', { methods: ['PATCH', 'DELETE'], authLevel: 'anonymous',
 app.http('linkStats', { methods: ['GET'], authLevel: 'anonymous', route: 'links/{slug}/stats', handler: async (request, context) => {
   try { return await backend().stats(request, request.params.slug); } catch (error) { return fail(error, context); }
 } });
+app.http('linkStatsCsv', { methods: ['GET'], authLevel: 'anonymous', route: 'links/{slug}/stats.csv', handler: async (request, context) => {
+  try { return await backend().statsCsv(request, request.params.slug); } catch (error) { return fail(error, context); }
+} });
 app.http('redirect', { methods: ['GET'], authLevel: 'anonymous', route: 'r/{owner}/{slug}', handler: async (request, context) => {
   try { return await backend().redirect(request.params.owner, request.params.slug); } catch (error) { return fail(error, context); }
 } });

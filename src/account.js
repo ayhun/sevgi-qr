@@ -62,6 +62,7 @@ if (location.pathname.replace(/\/$/, '') === '/dashboard') {
           stats.append(element('p', 'hint', data.note));
         } catch (error) { stats.textContent = error.message; }
       }),
+      (() => { const csv = element('a', 'text-button', 'Download CSV'); csv.href = `/api/links/${encodeURIComponent(link.id)}/stats.csv`; return csv; })(),
       action('Delete', async event => {
         if (!window.confirm('Permanently delete this managed link? Its QR code will stop working, and its scan counts will be removed. This cannot be undone.')) return;
         const button = event.currentTarget; button.disabled = true;
