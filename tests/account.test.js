@@ -9,8 +9,12 @@ test('default and reset design use black ink', () => {
 });
 test('dashboard routes require authentication while generator stays public', () => {
   const config = JSON.parse(readFileSync(new URL('../public/staticwebapp.config.json', import.meta.url)));
+  // Azure normalizes trailing slashes before validating route uniqueness.
+  const normalize = path => path.replace(/\/+$/, '') || '/';
+  const normalizedRoutes = config.routes.map(route => normalize(route.route));
+  assert.equal(new Set(normalizedRoutes).size, normalizedRoutes.length, 'Azure routes must be unique after trailing-slash normalization');
   for (const path of ['/dashboard', '/dashboard/']) {
-    const route = config.routes.find(route => route.route === path);
+    const route = config.routes.find(route => normalize(route.route) === normalize(path));
     assert.deepEqual(route.allowedRoles, ['authenticated']);
     assert.equal(route.rewrite, '/index.html');
     assert.equal(route.headers['Cache-Control'], 'no-store');

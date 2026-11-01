@@ -7,7 +7,6 @@
   },
   "routes": [
     { "route": "/dashboard", "rewrite": "/index.html", "allowedRoles": ["authenticated"], "headers": { "Cache-Control": "no-store" } },
-    { "route": "/dashboard/", "rewrite": "/index.html", "allowedRoles": ["authenticated"], "headers": { "Cache-Control": "no-store" } },
     { "route": "/.auth/login/github", "statusCode": 404 },
     { "route": "/assets/*", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
     { "route": "/", "headers": { "Cache-Control": "no-cache" } },
