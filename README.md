@@ -148,6 +148,23 @@ Provider auto-registration is disabled because the identity is resource-group-sc
 
 ## Local validation
 
+### Optional Microsoft sign-in
+
+The generator remains public and browser-only. Azure Static Web Apps' built-in
+Microsoft Entra provider handles `/.auth/login/aad` without an app secret in this
+repository. `/dashboard` and `/dashboard/` require the `authenticated` role at
+the Azure edge. The account page reads `/.auth/me` only when opened, uses no-store
+requests, and displays returned identity text without HTML interpolation.
+Sign-out uses `/.auth/logout`. University/work tenants may require admin consent.
+
+This release provides an account landing page, not link storage. Editable
+destinations and analytics are explicitly marked as upcoming. No redirect API,
+database, or scan tracking has been deployed. Static QR contents cannot be
+changed retroactively. The backend is a separate phase requiring a cost and
+privacy review. Auth routes require the deployed Azure host; Vite alone cannot
+complete sign-in. Verify Microsoft login and logout with a real test account
+after deployment; do not treat unit tests as an end-to-end auth test.
+
 ```bash
 terraform -chdir=infra fmt -check -recursive
 terraform -chdir=infra init -backend=false -lockfile=readonly

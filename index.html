@@ -15,13 +15,13 @@
 <body>
   <a class="skip-link" href="#generator">Skip to generator</a>
   <header class="site-header">
-    <a class="wordmark" href="https://sgkafali.com">SEVGI <span>GOKCE</span> KAFALI</a>
-    <nav aria-label="Main navigation"><a class="current" href="#generator" aria-current="page">QR Studio</a><a href="https://sgkafali.com">Back to portfolio <span aria-hidden="true">↗</span></a></nav>
+    <a class="wordmark" href="/">QR STUDIO <span>by Sevgi</span></a>
+    <nav aria-label="Main navigation"><a href="/#generator">Create a QR code</a><a href="/#about-tool">Why it’s free</a><a class="account-link" href="/#account">My links / Sign in</a></nav>
   </header>
   <main>
     <section class="intro" aria-labelledby="page-title">
-      <div><p class="eyebrow"><span class="dot"></span> A small tool for everyday sharing</p><h1 id="page-title">A little square.<br>A useful connection.</h1><p class="lede">Turn a link, a contact, or a few words into a QR code.<br class="desktop"> Ready for your next poster, presentation, or everyday use.</p></div>
-      <div class="intro-note"><span class="note-mark" aria-hidden="true">↗</span><p>Made in your browser.<br>Yours to keep.</p><span>No account. No expiry.</span></div>
+      <div><p class="eyebrow"><span class="dot"></span> Free QR codes. No ads. No paywall.</p><h1 id="page-title">Make a QR code.<br>Get on with your work.</h1><p class="lede">For your poster, paper, slides, or anything else you want to share.<br class="desktop"> All QR types, designs, logos, and downloads are free. No sign-in required.</p></div>
+      <div class="tool-note"><strong>No account needed</strong><p>Create → customize → download.</p><span>Your code is generated in this browser, not on a server.</span></div>
     </section>
     <section id="generator" class="workspace" aria-label="QR code generator">
       <div class="editor">
@@ -37,7 +37,7 @@
           <div class="section-label"><span>02 / APPEARANCE</span><span>Make it yours</span></div>
           <div class="settings">
             <fieldset class="color-field"><legend>Ink color</legend><div class="swatches" id="colors"></div></fieldset>
-            <label>PNG size<select id="size"><option value="512">512 × 512 px</option><option value="1024" selected>1024 × 1024 px</option><option value="2048">2048 × 2048 px</option></select></label>
+            <label>PNG width<select id="size"><option value="512">512 px</option><option value="1024" selected>1024 px</option><option value="2048">2048 px</option></select></label>
             <label>Error correction<select id="correction"><option value="M" selected>Standard (M)</option><option value="Q">Higher (Q)</option><option value="H">Highest (H)</option></select></label>
           </div>
           <div id="design-controls"></div>
@@ -53,7 +53,12 @@
         <details id="encoded-details"><summary>View encoded content</summary><pre id="encoded"></pre><button id="copy" class="text-button" type="button" disabled>Copy content</button></details>
       </aside>
     </section>
-    <section class="notes" aria-label="About this tool"><article><span class="note-number">01</span><h3>Private by design.</h3><p>Your entries stay in this browser tab. They aren’t uploaded or saved by this tool.</p></article><article><span class="note-number">02</span><h3>Made to last.</h3><p>These are static QR codes with no expiry. To change their content, generate a new code. Linked pages still need to stay online.</p></article><article><span class="note-number">03</span><h3>Ready for print.</h3><p>Use SVG for posters and publications, or PNG for slides and screens. Keep the white border and test at your final print size.</p></article></section>
+    <section id="account" class="account-section" aria-labelledby="account-title">
+      <div><p class="eyebrow">OPTIONAL ACCOUNT</p><h2 id="account-title">Your links, in one place.</h2><p>You never need an account to create or download a QR code. Microsoft sign-in is separate, for the personal link dashboard.</p><a class="sign-in" href="/.auth/login/aad?post_login_redirect_uri=/dashboard">Sign in with Microsoft <span aria-hidden="true">↗</span></a><p class="hint">Microsoft handles sign-in. QR Studio does not receive your password. Some work or university accounts may require administrator approval.</p></div>
+      <div class="planned-features"><span class="feature-status">NEXT UP · NOT AVAILABLE YET</span><h3>Useful features, without a paywall.</h3><ul><li>Save and organize your managed links.</li><li>Change a destination without reprinting your QR code.</li><li>See scan activity for your managed links.</li></ul><p>These dashboard features are planned to be free. They are not enabled yet. Codes created in the generator are static: their content cannot be changed and scans are not tracked.</p></div>
+    </section>
+    <section id="dashboard" class="dashboard" hidden aria-labelledby="dashboard-title"><p class="eyebrow">YOUR ACCOUNT</p><h1 id="dashboard-title">My links</h1><p id="account-status" role="status">Checking your Microsoft sign-in…</p><div class="dashboard-empty"><h2>Link management is on its way.</h2><p>You’re signed in, but saved links, editable destinations, and scan analytics aren’t enabled yet. No links or scan data are stored by this version.</p><a href="/#generator" class="sign-in">Create a free static QR code</a></div><a class="text-button" href="/.auth/logout?post_logout_redirect_uri=/">Sign out</a></section>
+    <section id="about-tool" class="story" aria-labelledby="story-title"><p class="eyebrow">WHY THIS EXISTS</p><h2 id="story-title">Built after one too many QR-code paywalls.</h2><p>I needed QR codes for my research posters, but finding a straightforward tool meant getting past ads, sign-up forms, and paid features. So I decided to build my own—and share it.</p><p>QR Studio is a practical tool, not a subscription funnel. Generation and downloads are free, with no login required. My aim is to make link management and analytics free too.</p><a href="https://sgkafali.com">— Sevgi Gokce Kafali ↗</a></section>
   </main>
   <footer><span>© <span id="year"></span> Sevgi Gokce Kafali</span><a href="https://sgkafali.com">Part of sgkafali.com <span aria-hidden="true">↗</span></a></footer>
   <noscript><p class="noscript">This tool needs JavaScript to generate QR codes in your browser.</p></noscript>

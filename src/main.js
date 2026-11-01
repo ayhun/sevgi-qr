@@ -3,6 +3,7 @@ import { renderDesign, rasterize } from './design.js';
 import { designControls } from './design-controls.js';
 import { buildPayload } from './payload.js';
 import './style.css';
+import './account.js';
 
 const icons = {
   link: '<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2"/>',
@@ -31,7 +32,7 @@ const types = {
 };
 const $ = id => document.getElementById(id);
 let selected = 'link';
-let ink = '#1d5849';
+let ink = '#000000';
 let revision = 0;
 let timer;
 let ready = null;
@@ -47,10 +48,10 @@ for (const [key, type] of Object.entries(types)) {
   button.addEventListener('click', () => { selected = key; renderFields(); update(); });
   $('types').append(button);
 }
-for (const [color, name] of [['#1d5849', 'Forest'], ['#18231f', 'Charcoal'], ['#203e66', 'Navy']]) {
+for (const [color, name] of [['#000000', 'Black'], ['#18231f', 'Charcoal'], ['#203e66', 'Navy'], ['#1d5849', 'Forest'], ['#115e59', 'Teal'], ['#1e40af', 'Blue'], ['#4338ca', 'Indigo'], ['#6b21a8', 'Purple'], ['#9d174d', 'Berry'], ['#991b1b', 'Red'], ['#9a3412', 'Rust'], ['#713f12', 'Brown']]) {
   const button = document.createElement('button');
   button.type = 'button'; button.className = 'swatch'; button.style.background = color;
-  button.setAttribute('aria-label', name); button.dataset.color = color; button.innerHTML = '<span aria-hidden="true"></span>';
+  button.setAttribute('aria-label', name); button.title = name; button.dataset.color = color; button.innerHTML = '<span aria-hidden="true"></span>';
   button.addEventListener('click', () => { ink = color; design.color = color; $('design-color').value = color; updateColors(); update(); });
   $('colors').append(button);
 }

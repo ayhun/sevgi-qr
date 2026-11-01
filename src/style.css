@@ -21,3 +21,22 @@
 .logo-choices svg{width:26px;height:26px}
 .qr-stage{aspect-ratio:auto;min-height:250px}.qr-stage canvas{image-rendering:auto}
 @media(min-width:701px){.preview{align-self:start;position:sticky;top:85px}}
+/* A working tool first: compact introduction, optional account second. */
+.intro{padding:35px 0 30px;gap:24px}h1{font-family:Manrope,Arial,sans-serif;font-size:clamp(30px,3.3vw,44px);font-weight:700;letter-spacing:-.045em;line-height:1.12}
+.intro .eyebrow{margin-bottom:13px}.intro .lede{margin-top:14px;font-size:13px}
+.tool-note{max-width:240px;border-left:2px solid var(--green);padding:10px 0 10px 20px;font-size:12px;line-height:1.7}.tool-note p{margin:8px 0}.tool-note span{color:var(--muted)}
+.settings{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr)}
+.settings>*{min-width:0}.swatches{display:grid;grid-template-columns:repeat(auto-fit,24px);gap:9px;margin:13px 3px 3px;padding:0 2px 2px 0}.swatch{flex-shrink:0}
+.account-section{display:grid;grid-template-columns:1fr 1fr;gap:40px;padding:36px 0;border-bottom:1px solid var(--line);scroll-margin-top:110px}
+.account-section h2,.story h2,.dashboard h2{font-family:Manrope,Arial,sans-serif;font-size:25px;letter-spacing:-.03em;margin:0 0 16px;font-weight:700}
+.account-section p,.story p,.dashboard p{font-size:13px;line-height:1.8;color:var(--muted)}
+.sign-in{display:inline-flex;gap:20px;align-items:center;background:var(--green);color:white;padding:13px 18px;font-size:12px;font-weight:600;margin:10px 0 16px}
+.sign-in:hover{background:#143e33}.account-section .hint{font-size:11px;margin:0;max-width:440px}
+.planned-features{background:#eff2ed;padding:24px}.feature-status{font:10px 'DM Mono',monospace;letter-spacing:.03em;color:var(--green)}
+.planned-features h3{font:600 18px Manrope,Arial,sans-serif;margin:15px 0}.planned-features ul{padding-left:18px;font-size:13px;line-height:2}.planned-features p{font-size:12px;margin-bottom:0}
+.story{padding:36px 0 45px;max-width:760px;scroll-margin-top:110px}.story a{font-size:12px;text-decoration:underline;text-underline-offset:4px}.story .eyebrow{font-size:11px}
+.dashboard{padding:44px 0;min-height:65vh}.dashboard-empty{border:1px solid var(--line);background:white;padding:28px;margin:28px 0}
+.dashboard-view main>section:not(#dashboard){display:none}.dashboard[hidden],.dashboard-empty[hidden]{display:none}
+@media(max-width:700px){.appearance .settings{grid-template-columns:1fr 1fr}.appearance .color-field{grid-column:1/-1}}
+@media(max-width:900px){.color-field{grid-column:auto}.settings{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr)}.tool-note{display:none}.site-header{flex-wrap:wrap}}
+@media(max-width:700px){.site-header{padding:15px 20px;gap:12px}nav{width:100%;gap:6px;justify-content:space-between;font-size:9px}nav a{padding:9px 7px}.intro{padding:26px 0}.intro h1{font-size:32px}.intro .eyebrow{font-size:9px}.account-section{grid-template-columns:1fr;gap:24px}.planned-features{padding:20px}.settings{gap:12px}.settings select{padding:10px 3px;font-size:10px}.swatches{grid-template-columns:repeat(auto-fit,24px);gap:8px}.account-section h2,.story h2{font-size:22px}}
